@@ -86,6 +86,19 @@
               {{ props.item.event }}
             </span>
 
+            <!-- Additional column for jira links -->
+            <span
+              v-if="col == 'assigned jira' && alertHasJira(props.item)"
+            >
+              <a
+                :href="props.item.attributes.jira.url"
+                @click.stop
+                target="_blank"
+              >
+                {{ props.item.attributes.jira.key }}
+              </a>
+            </span>
+
             <!-- Additional column for operational runbook links -->
             <span
               v-if="col == 'info'"
@@ -656,6 +669,9 @@ export default {
     removeHotkey(event) {
       event.code === 'ShiftLeft' || event.code === 'ShiftRight' ? this.shiftDown = false : 0
     },
+    alertHasJira(alert) {
+      return alert.attributes.hasOwnProperty('jira')
+    },
     // method for mapping table data to links from runbook data
     findMatch(additionalRespObj, props){
       const validMatch = additionalRespObj.matches.every(matchesObj => {
@@ -667,9 +683,6 @@ export default {
       })
       // return link if all regex checks pass
       return validMatch ? additionalRespObj.output : null
-    },
-    attributeMatch(item){
-      return this.cars.id === carID ? true : false
     },
     duration(item) {
       return moment.duration(moment().diff(moment(item.receiveTime)))
