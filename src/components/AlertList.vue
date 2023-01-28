@@ -86,19 +86,6 @@
               {{ props.item.event }}
             </span>
 
-            <!-- Additional column for jira links -->
-            <span
-              v-if="col == 'assigned jira' && alertHasJira(props.item)"
-            >
-              <a
-                :href="props.item.attributes.jira.url"
-                @click.stop
-                target="_blank"
-              >
-                {{ props.item.attributes.jira.key }}
-              </a>
-            </span>
-
             <!-- Additional column for operational runbook links -->
             <span
               v-if="col == 'info'"
@@ -200,8 +187,20 @@
                 :style="fontStyle"
               >{{ tag }}</span>&nbsp;</span>
             </span>
+            <!-- Additional column for jira links -->
             <span
-              v-if="props.item.attributes.hasOwnProperty(col)"
+              v-if="col == 'jira' && alertHasJira(props.item)"
+            >
+              <a
+                :href="props.item.attributes.jira.url"
+                target="_blank"
+                @click.stop
+              >
+                {{ props.item.attributes.jira.key }}
+              </a>
+            </span>
+            <span
+              v-if="props.item.attributes.hasOwnProperty(col) && col != 'jira'"
             >
               <span v-html="props.item.attributes[col]" />
             </span>

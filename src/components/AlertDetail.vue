@@ -283,7 +283,7 @@
                 <i>{{ note.text }}</i>
               </v-alert>
               <!-- DEPRECATED -->
-              <create-jira
+              <jira-actions
                 :id="item.id"
                 :attributes="item.attributes"
               />
@@ -884,14 +884,14 @@
 import debounce from 'lodash/debounce'
 import DateTime from './lib/DateTime'
 import AlertActions from '@/components/AlertActions'
-import CreateJira from '@/components/CreateJira.vue'
+import JiraActions from '@/components/JiraActions'
 import i18n from '@/plugins/i18n'
 
 export default {
   components: {
     DateTime,
     AlertActions,
-    CreateJira
+    JiraActions
   },
   props: {
     id: {
