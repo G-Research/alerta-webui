@@ -39,6 +39,9 @@ class Config {
           if (config.hasOwnProperty('runbook')) {
             config.columns.push('info')
           }
+          if (config.hasOwnProperty('jira')) {
+            config.columns.splice(2, 0, 'jira')
+          }
         }
         return config
       })

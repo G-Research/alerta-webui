@@ -283,7 +283,10 @@
                 <i>{{ note.text }}</i>
               </v-alert>
               <!-- DEPRECATED -->
-
+              <jira-actions
+                :id="item.id"
+                :attributes="item.attributes"
+              />
               <v-card-text>
                 <div class="flex xs12 ma-1">
                   <div class="d-flex align-top">
@@ -702,7 +705,30 @@
                   </div>
                 </div>
                 <div
-                  v-for="(value, attr) in item.attributes"
+                  v-if="jiraAssigned"
+                  class="flex xs12 ma-1"
+                >
+                  <div class="d-flex align-top">
+                    <div class="flex xs3 text-xs-left">
+                      <div class="grey--text">
+                        {{ $t('Jira') }}
+                      </div>
+                    </div>
+                    <div class="flex xs6 text-xs-left">
+                      <div>
+                        <a
+                          :href="this.item.attributes.jira.url"
+                          target="_blank"
+                          @click.stop
+                        >
+                          {{ this.item.attributes.jira.key }}
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  v-for="(value, attr) in filteredAttributes"
                   :key="attr"
                   class="flex xs12 ma-1"
                 >
@@ -858,12 +884,14 @@
 import debounce from 'lodash/debounce'
 import DateTime from './lib/DateTime'
 import AlertActions from '@/components/AlertActions'
+import JiraActions from '@/components/JiraActions'
 import i18n from '@/plugins/i18n'
 
 export default {
   components: {
     DateTime,
-    AlertActions
+    AlertActions,
+    JiraActions
   },
   props: {
     id: {
@@ -896,6 +924,23 @@ export default {
     copyIconText: i18n.t('Copy')
   }),
   computed: {
+    filteredAttributes() {
+      const notAllowed = ['jira']
+      if (typeof this.item != 'undefined') {
+        if (typeof this.item.attributes != 'undefined') {
+          return Object.keys(this.item.attributes).filter(key => !notAllowed.includes(key))
+        }
+      }
+      return {}
+    },
+    jiraAssigned() {
+      if (typeof this.item != 'undefined') {
+        if (typeof this.item.attributes != 'undefined') {
+          return this.item.attributes.hasOwnProperty('jira')
+        }
+      }
+      return false
+    },
     isDark() {
       return this.$store.getters.getPreference('isDark')
     },
