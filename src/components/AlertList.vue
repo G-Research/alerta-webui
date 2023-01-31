@@ -85,6 +85,19 @@
             >
               {{ props.item.event }}
             </span>
+
+            <!-- Additional column for operational runbook links -->
+            <span
+              v-if="col == 'info'"
+            >
+              <div
+                v-for="data in $config.runbook"
+                :key="data.output"
+              >                
+                <div v-html="findMatch(data,props)" />
+              </div>
+            </span>
+            
             <span
               v-if="col == 'environment'"
             >
@@ -497,6 +510,7 @@ export default {
       id: { text: i18n.t('AlertId'), value: 'id' },
       resource: { text: i18n.t('Resource'), value: 'resource' },
       event: { text: i18n.t('Event'), value: 'event' },
+      info: { text: i18n.t('Info'), value: 'info', sortable: false },
       environment: { text: i18n.t('Environment'), value: 'environment' },
       severity: { text: i18n.t('Severity'), value: 'severity' },
       correlate: { text: i18n.t('Correlate'), value: 'correlate' },
@@ -549,8 +563,9 @@ export default {
     },
     columnWidths() {
       return {
-        '--value-width': this.valueWidth() + 'px',
-        '--text-width': this.textWidth() + 'px'
+        // '--value-width': this.valueWidth() + 'px',
+        // '--text-width': this.textWidth() + 'px'
+        // altered to prevent overflow and odd spacing in last column
       }
     },
     isLoading() {
@@ -635,7 +650,19 @@ export default {
   created() {
     this.initHotkeys()
   },
-  methods: {
+  methods: {   
+    // method for mapping table data to links from runbook data
+    findMatch(additionalRespObj, props){   
+      const validMatch = additionalRespObj.matches.every(matchesObj => {
+        // make comparisons case-insensitive
+        const filter = new RegExp((matchesObj.regex).toLowerCase())
+        const columnName = (matchesObj.column).toLowerCase()
+        const columnData = (props.item[columnName]).toLowerCase()
+        return filter.test(columnData)
+      })
+      // return link if all regex checks pass
+      return validMatch ? additionalRespObj.output : null 
+    },
     initHotkeys() {
       window.addEventListener('keydown', this.processHotkey)
       window.addEventListener('keyup', this.removeHotkey)
@@ -848,7 +875,7 @@ div.select-box {
 }
 
 div.action-buttons {
-  position: absolute;
+  position: relative;
   opacity: 0;
   right: 0;
   top: 0.5em;

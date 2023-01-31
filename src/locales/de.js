@@ -92,6 +92,7 @@ export const de = {
   Environment: 'Umgebung',
   Resource: 'Ressource',
   Event: 'Ereignis',
+  Info: 'die Info',
   Correlate: 'Korrelation',
   Group: 'Gruppe',
   Severity: 'Schweregrad',

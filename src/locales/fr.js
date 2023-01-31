@@ -92,6 +92,7 @@ export const fr = {
   Environment: 'Environnement',
   Resource: 'Ressource',
   Event: 'Evénement',
+  Info: 'Info',
   Correlate: 'Corrélation',
   Group: 'Groupe',
   Severity: 'Gravité',

@@ -93,6 +93,7 @@ export const tr = {
   Environment: 'Ortam',
   Resource: 'Kaynak',
   Event: 'Olay',
+  Info: 'Bilgi',
   Correlate: 'İlişkilendir',
   Group: 'Grup',
   Severity: 'Şiddet',
