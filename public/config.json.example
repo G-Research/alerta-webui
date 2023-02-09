@@ -14,5 +14,18 @@
         }
       ]
     }
-  ]
+  ],
+  "jira": {
+    "assignees": [
+      {
+        "project": "THJ",
+        "issue-type": "Task",
+      },
+      {
+        "project": "THJ",
+        "issue-type": "Task",
+        "user": "headphonejames@gmail.com"
+      }
+    ]
+  },
 }
