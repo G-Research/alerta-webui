@@ -200,7 +200,7 @@
               >{{ tag }}</span>&nbsp;</span>
             </span>
             <span
-              v-if="props.item.attributes.hasOwnProperty(col) &&/**/ col != 'jira'"
+              v-if="props.item.attributes.hasOwnProperty(col) && col != 'jira'"
             >
               <span v-html="props.item.attributes[col]" />
             </span>
