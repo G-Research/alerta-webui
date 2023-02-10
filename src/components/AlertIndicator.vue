@@ -24,7 +24,7 @@
             class="counts-container"
           >
             <v-layout
-              v-if="counts"
+              v-if="counts && ackCounts"
               align-start
               justify-space-between
             >
@@ -34,7 +34,7 @@
                 class="count text-xs-center py-2"
                 :style="{ 'background-color': severityColor(severity) }"
               >
-                {{ counts[severity] || 0 }}
+                {{ ackCounts[severity] || 0 }} / {{ counts[severity] || 0 }}
               </div>
             </v-layout>
           </div>
@@ -60,6 +60,7 @@ export default {
   },
   data: () => ({
     counts: null,
+    ackCounts: null,
     openCounts: null,
     maxSeverity: null,
     timer: null
@@ -83,6 +84,7 @@ export default {
       if (val) {
         this.getMostSevere()
         this.getCounts()
+        this.getCountsWithAck()
       }
     }
   },
@@ -119,6 +121,20 @@ export default {
       return AlertsApi.getCounts(new URLSearchParams(this.query))
         .then(response => (this.counts = response.severityCounts))
     },
+    getCountsWithAck() {
+      let searchParams = null
+      if (Array.isArray(this.query)) {
+        searchParams = new URLSearchParams([...this.query, ['status', 'ack']])
+      } else {
+        let queryStr = this.query.toString()
+        if (typeof this.query === 'object') {
+          queryStr = this.query.q.replace(':', '=')
+        }
+        searchParams = new URLSearchParams(`${queryStr}&status=ack`)
+      }
+      return AlertsApi.getCounts(searchParams)
+        .then(response => (this.ackCounts = response.severityCounts))
+    },
     getMostSevere() {
       let paramsWithOpenStatus = new URLSearchParams(this.query)
       paramsWithOpenStatus.append('status', 'open')
@@ -136,6 +152,7 @@ export default {
     },
     refreshCounts() {
       this.getMostSevere()
+      this.getCountsWithAck()
       this.getCounts()
         .then(() => this.timer = setTimeout(() => this.refreshCounts(), this.refreshInterval))
     },
