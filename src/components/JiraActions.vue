@@ -1,90 +1,88 @@
 <template>
-  <div v-if="attributesExist">
-    <div v-if="noJiraAssigned">
-      <v-card-text>
-        <div class="flex xs12 ma-1">
-          <div class="d-flex align-top">
-            <div class="flex xs3 text-xs-left">
-              <div class="text-center">
-                <v-menu offset-y>
-                  <template v-slot:activator="{ on, attrs }">
-                    <v-btn
-                      color="primary"
-                      dark
-                      v-bind="attrs"
-                      v-on="on"
-                    >
-                      Create Jira
-                    </v-btn>
-                  </template>
-                  <v-list
-                    v-for="(item, index) in assignees"
-                    :key="index"
-                  >
-                    <div
-                      v-if="item.user"
-                      class="action-item"
-                      @click="createJira(id, item)"
-                    >
-                      {{ item.project }} : {{ item.user }}
-                    </div>
-                    <div
-                      v-else
-                      class="action-item"
-                      @click="createJira(id, item)"
-                    >
-                      {{ item.project }}
-                    </div>
-                  </v-list>
-                </v-menu>
-              </div>
-            </div>
-          </div>
-          <div class="d-flex">
-            <div class="flex">
-              <div class="text-center">
-                <v-btn
-                  color="primary"
-                  dark
-                  @click="toggleAttachJira"
-                >
-                  Attach Jira
-                </v-btn>
-                <div v-if="show_attach">
-                  <v-text-field v-model="jira_key" />
+  <div v-if="noJiraAssigned">
+    <v-card-text>
+      <div class="flex xs12 ma-1">
+        <div class="d-flex align-top">
+          <div class="flex xs3 text-xs-left">
+            <div class="text-center">
+              <v-menu offset-y>
+                <template v-slot:activator="{ on, attrs }">
                   <v-btn
                     color="primary"
                     dark
-                    @click="attachJira(id)"
+                    v-bind="attrs"
+                    v-on="on"
                   >
-                    Attach
+                    Create Jira
                   </v-btn>
-                </div>
-              </div>
+                </template>
+                <v-list
+                  v-for="(assignee, index) in assignees"
+                  :key="index"
+                >
+                  <div
+                    v-if="assignee.user"
+                    class="action-item"
+                    @click="createJira(id, assignee)"
+                  >
+                    {{ assignee.project }} : {{ assignee.user }}
+                  </div>
+                  <div
+                    v-else
+                    class="action-item"
+                    @click="createJira(id, assignee)"
+                  >
+                    {{ assignee.project }}
+                  </div>
+                </v-list>
+              </v-menu>
             </div>
           </div>
         </div>
-      </v-card-text>
-    </div>
-    <div v-else>
-      <v-card-text>
-        <div class="flex xs12 ma-1">
-          <div class="d-flex align-top">
-            <div class="flex xs3 text-xs-left">
-              <div class="text-center">
+        <div class="d-flex">
+          <div class="flex">
+            <div class="text-center">
+              <v-btn
+                color="primary"
+                dark
+                @click="toggleAttachJira"
+              >
+                Attach Jira
+              </v-btn>
+              <div v-if="show_attach">
+                <v-text-field v-model="jira_key" />
                 <v-btn
                   color="primary"
                   dark
-                  @click="detachJira(id)"
+                  @click="attachJira(id)"
                 >
-                  Detach Jira
+                  Attach
                 </v-btn>
               </div>
             </div>
           </div>
         </div>
-      </v-card-text>
-    </div>
+      </div>
+    </v-card-text>
+  </div>
+  <div v-else>
+    <v-card-text>
+      <div class="flex xs12 ma-1">
+        <div class="d-flex align-top">
+          <div class="flex xs3 text-xs-left">
+            <div class="text-center">
+              <v-btn
+                color="primary"
+                dark
+                @click="detachJira(id)"
+              >
+                Detach Jira
+              </v-btn>
+            </div>
+          </div>
+        </div>
+      </div>
+    </v-card-text>
   </div>
 </template>
 <script>
@@ -95,9 +93,11 @@ export default {
   props: {
     id: {
       type: String,
+      required: true
     },
     attributes: {
       type: Object,
+      required: true
     }
   },
   data: () => ({
@@ -108,14 +108,14 @@ export default {
     item() {
       return this.$store.state.alerts.alert
     },
-    attributesExist() {
-      return typeof this.attributes !== 'undefined'
-    },
     noJiraAssigned() {
-      return !('jira' in this.attributes)
+      if (typeof this.attributes !== 'undefined') {
+        return !('jira' in this.attributes)
+      }
+      return false
     },
     assignees() {
-      return this.$store.getters.getConfig('jira').assignees
+      return this.$store.getters.getConfig('services')['jira'].assignees
     },
   },
   methods: {
@@ -138,13 +138,13 @@ export default {
         .then(() => this.getAlert(this.id))
     }, 200, {leading: true, trailing: false}),
     attachJira: debounce(function(id) {
-      this.toggleAttachJira()
       this.$store
         .dispatch('alerts/takeAction',
                   [id, 'attachJira', this.jira_key])
         .then(() => {
           this.getAlert(this.id)
           this.jira_key = ''
+          this.toggleAttachJira()
         })
     }, 200, {leading: true, trailing: false}),
   }

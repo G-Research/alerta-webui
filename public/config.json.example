@@ -1,31 +1,3 @@
 {
-  "endpoint": "http://localhost:8080",
-  "runbook": [
-    {
-      "output": "<a href=https://link-to-correct-resource.com>handbook1</a>",
-      "matches": [
-        {
-          "column": "event",
-          "regex": "http.*"
-        },
-        {
-          "column": "Environment",
-          "regex": "^Dev.*$"
-        }
-      ]
-    }
-  ],
-  "jira": {
-    "assignees": [
-      {
-        "project": "THJ",
-        "issue-type": "Task",
-      },
-      {
-        "project": "THJ",
-        "issue-type": "Task",
-        "user": "someuser@gmail.com"
-      }
-    ]
-  },
+  "endpoint": "http://localhost:8080"
 }
