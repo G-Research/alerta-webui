@@ -377,5 +377,8 @@ export const tr = {
   // two above paraphrased together to break at the right place. sounds awkward of course
   OK: 'OK',
 
+  // Services
+  Jira: 'Jira',
+
   // ENDS.
 }

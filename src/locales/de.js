@@ -374,5 +374,8 @@ export const de = {
   SearchNoResult2: 'hat nichts gefunden.',
   OK: 'OK',
 
+  // Services
+  Jira: 'Jira',
+
   // ENDS.
 }
