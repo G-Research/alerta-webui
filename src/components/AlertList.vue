@@ -113,6 +113,18 @@
                 {{ props.item.severity | capitalize }}
               </span>
             </span>
+            <!-- Additional column for jira links -->
+            <span
+              v-if="col == 'jira' && alertHasJira(props.item)"
+            >
+              <a
+                :href="props.item.attributes.jira.url"
+                target="_blank"
+                @click.stop
+              >
+                {{ props.item.attributes.jira.key }}
+              </a>
+            </span>
             <span
               v-if="col == 'correlate'"
             >
@@ -188,7 +200,7 @@
               >{{ tag }}</span>&nbsp;</span>
             </span>
             <span
-              v-if="props.item.attributes.hasOwnProperty(col)"
+              v-if="props.item.attributes.hasOwnProperty(col) && col != 'jira'"
             >
               <span v-html="props.item.attributes[col]" />
             </span>
@@ -672,6 +684,9 @@ export default {
     },
     removeHotkey(event) {
       event.code === 'ShiftLeft' || event.code === 'ShiftRight' ? this.shiftDown = false : 0
+    },
+    alertHasJira(alert) {
+      return alert.attributes.hasOwnProperty('jira')
     },
     duration(item) {
       return moment.duration(moment().diff(moment(item.receiveTime)))
