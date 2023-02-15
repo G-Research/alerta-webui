@@ -113,11 +113,61 @@ export default {
       })
     },
     severityColor(severity) {
-      return this.counts && this.counts[severity] > 0 ? this.$store.getters.getConfig('colors').severity[severity] : 'transparent'
+      return this.counts && this.counts[severity] ? this.$store.getters.getConfig('colors').severity[severity] : 'transparent'
     },
-    getCounts() {
-      return AlertsApi.getCounts(new URLSearchParams(this.query))
-        .then(response => (this.counts = response.severityCounts))
+
+    async getCounts() {
+      const statusOfCounts = this.$store.getters.getConfig('statusCounts')
+      if (statusOfCounts) {
+        // first get the total counts.
+        const response = await AlertsApi.getCounts(new URLSearchParams(this.query))
+        let totalCounts = response.severityCounts
+        // create a count holder object
+        const theCounts = {}
+        // initialize the counts to empty string
+        for (let key in totalCounts) {
+          theCounts[key] = ''
+        }
+
+        // get the counts for each status
+        for (let status of statusOfCounts) {
+          // build the query for this status
+          let searchParams = new URLSearchParams(this.query)
+          if (Array.isArray(this.query)) {
+            searchParams = new URLSearchParams([...this.query, ['status', status]])
+          } else {
+            let queryStr = this.query.toString()
+            if (typeof this.query === 'object') {
+              queryStr = this.query.q.replace(':', '=')
+            }
+            searchParams = new URLSearchParams(`${queryStr}&status=${status}`)
+          }
+
+          // get the counts for this status
+          const response = await AlertsApi.getCounts(searchParams)
+
+          // append the counts to the count holder object
+          for (let totalCountKey in totalCounts) {
+            // either initialize the string or append to the string
+            if (response.severityCounts[totalCountKey]) {
+              theCounts[totalCountKey] = theCounts[totalCountKey] ? `${theCounts[totalCountKey]} / ${response.severityCounts[totalCountKey]}` : `${response.severityCounts[totalCountKey]}`
+            } else {
+              theCounts[totalCountKey] = theCounts[totalCountKey] ? `${theCounts[totalCountKey]} / 0` : '0'
+            }
+          }
+        }
+
+        // append the total counts to the count holder object
+        for (let [totalCountKey, value] of Object.entries(totalCounts)) {
+          theCounts[totalCountKey] += ' / ' + value
+        }
+
+        // set the counts, refresh the view
+        this.counts = theCounts
+      } else {
+        const response = await AlertsApi.getCounts(new URLSearchParams(this.query))
+        this.counts = response.severityCounts
+      }
     },
     getMostSevere() {
       let paramsWithOpenStatus = new URLSearchParams(this.query)
