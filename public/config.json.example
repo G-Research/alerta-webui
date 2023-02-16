@@ -1,6 +1,7 @@
 {
   "endpoint": "http://localhost:8080",
   "statusCounts": ["open", "ack"],
+  "notificationBlackout": true,
   "runbook": [
     {
       "output": "<a href=https://link-to-correct-resource.com>handbook1</a>",
