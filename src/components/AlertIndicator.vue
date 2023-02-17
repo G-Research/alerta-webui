@@ -95,12 +95,8 @@ export default {
   },
   methods: {
     selectAsi() {
-      this.setSearch(new URLSearchParams(this.query))
-      this.setFilter(new URLSearchParams(this.query))
+      this.setFilter(this.createURLSearchParams())
       this.refreshList()
-    },
-    setSearch(query) {
-      this.$store.dispatch('alerts/updateQuery', query)
     },
     setFilter(filter) {
       this.$store.dispatch('alerts/setFilter', {
@@ -115,67 +111,25 @@ export default {
     severityColor(severity) {
       return this.counts && this.counts[severity] ? this.$store.getters.getConfig('colors').severity[severity] : 'transparent'
     },
-    async getCountsOfStatus(status) {
-      // build the query for this status
-      let searchParams = null
-      // depending on the type of query, build the search params
-      if (Array.isArray(this.query)) {
-        searchParams = new URLSearchParams([...this.query, ['status', status]])
-      } else {
-        let queryStr = this.query.toString()
-        if (typeof this.query === 'object') {
-          queryStr = this.query.q.replace(':', '=')
+    createURLSearchParams() {
+      const countsFilter = this.$store.getters.getConfig('countsFilter')
+      if (countsFilter) {
+        // depending on the type of query, build the search params
+        if (Array.isArray(this.query)) {
+          return new URLSearchParams([...this.query, ['status', countsFilter]])
+        } else {
+          let queryStr = this.query.toString()
+          if (typeof this.query === 'object') {
+            queryStr = this.query.q.replace(':', '=')
+          }
+          return new URLSearchParams(`${queryStr}&status=${countsFilter}`)
         }
-        searchParams = new URLSearchParams(`${queryStr}&status=${status}`)
       }
-
-      // get the counts for this status
-      const response = await AlertsApi.getCounts(searchParams)
-      return response.severityCounts
+      return new URLSearchParams(this.query)
     },
     async getCounts() {
-      const notificationBlackoutConfig = this.$store.getters.getConfig('notificationBlackout')
-      const blackoutCounts = notificationBlackoutConfig ? await this.getCountsOfStatus('blackout') : null
-      const statusCountsConfig = this.$store.getters.getConfig('statusCounts')
-      // first get the total counts.
-      const response = await AlertsApi.getCounts(new URLSearchParams(this.query))
-      const totalCounts = response.severityCounts
-      // if there are blackout counts, remove them from the total counts
-      if (blackoutCounts) {
-        for (let key in blackoutCounts) {
-          totalCounts[key] -= blackoutCounts[key]
-        }
-      }
-      if (statusCountsConfig) {
-        // create a count holder object. Named to not conflict with vue model this.counts
-        const theCounts = {}
-        // initialize the counts to empty string
-        for (let key in totalCounts) {
-          theCounts[key] = ''
-        }
-        // get the counts for each status.
-        for (let status of statusCountsConfig) {
-          const severityCounts = await this.getCountsOfStatus(status)
-          // append the counts to the count holder object
-          for (let totalCountKey in totalCounts) {
-            // either initialize the string or append to the string
-            if (severityCounts[totalCountKey]) {
-              theCounts[totalCountKey] = theCounts[totalCountKey] ? `${theCounts[totalCountKey]} / ${severityCounts[totalCountKey]}` : `${severityCounts[totalCountKey]}`
-            } else {
-              theCounts[totalCountKey] = theCounts[totalCountKey] ? `${theCounts[totalCountKey]} / 0` : '0'
-            }
-          }
-        }
-        // append the total counts to the count holder object
-        for (let [key, value] of Object.entries(totalCounts)) {
-          theCounts[key] += ' / ' + value
-        }
-        // set the counts, refresh the view
-        this.counts = theCounts
-      } else {
-        // set the counts, refresh the view
-        this.counts = totalCounts
-      }
+      const response = await AlertsApi.getCounts(this.createURLSearchParams())
+      this.counts = response.severityCounts
     },
     getMostSevere() {
       let paramsWithOpenStatus = new URLSearchParams(this.query)
