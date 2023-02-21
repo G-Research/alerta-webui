@@ -925,10 +925,16 @@ export default {
   }),
   computed: {
     filteredAttributes() {
-      const notAllowed = ['jira']
+      const nowAllowedKeys = ['jira']
       if (typeof this.item != 'undefined') {
         if (typeof this.item.attributes != 'undefined') {
-          return Object.keys(this.item.attributes).filter(key => !notAllowed.includes(key))
+          // filter out not allowed keys
+          return Object.keys(this.item.attributes)
+            .filter(key => !nowAllowedKeys.includes(key))
+            .reduce((obj, key) => {
+              obj[key] = this.item.attributes[key]
+              return obj
+            }, {})
         }
       }
       return {}
