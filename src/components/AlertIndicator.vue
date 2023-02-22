@@ -95,8 +95,11 @@ export default {
   },
   methods: {
     selectAsi() {
-      this.setFilter(this.createURLSearchParams())
+      this.setSearch(this.updateQuery())
       this.refreshList()
+    },
+    setSearch(query) {
+      this.$store.dispatch('alerts/updateQuery', query)
     },
     setFilter(filter) {
       this.$store.dispatch('alerts/setFilter', {
@@ -111,24 +114,41 @@ export default {
     severityColor(severity) {
       return this.counts && this.counts[severity] ? this.$store.getters.getConfig('colors').severity[severity] : 'transparent'
     },
-    createURLSearchParams() {
+    updateQuery() {
       const countsFilter = this.$store.getters.getConfig('countsFilter')
-      if (countsFilter) {
-        // depending on the type of query, build the search params
-        if (Array.isArray(this.query)) {
-          return new URLSearchParams([...this.query, ['status', countsFilter]])
-        } else {
-          let queryStr = this.query.toString()
-          if (typeof this.query === 'object') {
-            queryStr = this.query.q.replace(':', '=')
+      // depending on the type of query, build the search params
+      if (Array.isArray(this.query)) {
+        // reconstruct array into a single query string with boolean search terms
+        const updatedQuery = {}
+        this.query.forEach(([key, value]) => {
+          if (updatedQuery.q === undefined) {
+            updatedQuery.q = `${key}:${value}`
+          } else {
+            updatedQuery.q = `(${updatedQuery.q}) AND ${key}:${value}`
           }
-          return new URLSearchParams(`${queryStr}&status=${countsFilter}`)
+        })
+        if (countsFilter) {
+          updatedQuery.q = `(${updatedQuery.q}) AND status:${countsFilter}`
         }
+        return updatedQuery
+      } else if (typeof this.query === 'object') {
+        // deep copy this.query
+        const updatedQuery = JSON.parse(JSON.stringify(this.query))
+        // if countsFilter is set, add it to the query and replace it in object
+        if (countsFilter) {
+          updatedQuery.q = `(${this.query.q}) AND status:${countsFilter}`
+        }
+        return updatedQuery
+      } else {
+        const updatedQuery = {q: this.query.toString()}
+        if (countsFilter) {
+          updatedQuery.q = `${this.query.toString()}&status=${countsFilter}`
+        }
+        return updatedQuery
       }
-      return new URLSearchParams(this.query)
     },
     async getCounts() {
-      const response = await AlertsApi.getCounts(this.createURLSearchParams())
+      const response = await AlertsApi.getCounts(new URLSearchParams(this.updateQuery()))
       this.counts = response.severityCounts
     },
     getMostSevere() {
