@@ -8,7 +8,7 @@
       :style="{ 'background-color': severityColor(maxSeverity) }"
     >
       <div
-        class="text-uppercase text-xs-center py-2"
+        class="text-uppercase text-center py-2"
       >
         {{ title }}
       </div>
@@ -18,12 +18,12 @@
       class="pa-0 mx-0"
       :style="{ 'background-color': isDark ? '' : '#F5F5F5' }"
     >
-      <v-layout>
-        <v-flex>
+      <v-row>
+        <v-col>
           <div
             class="counts-container"
           >
-            <v-layout
+            <v-row
               v-if="counts"
               align-start
               justify-space-between
@@ -31,15 +31,15 @@
               <div
                 v-for="severity in $config.indicators.severity"
                 :key="severity"
-                class="count text-xs-center py-2"
+                class="count text-center py-2"
                 :style="{ 'background-color': severityColor(severity) }"
               >
                 {{ counts[severity] || 0 }}
               </div>
-            </v-layout>
+            </v-row>
           </div>
-        </v-flex>
-      </v-layout>
+        </v-col>
+      </v-row>
     </v-card-actions>
   </v-card>
 </template>
@@ -90,13 +90,12 @@ export default {
     this.cancelTimer()
     this.refreshCounts()
   },
-  beforeDestroy() {
+  beforeUnmount() {
     this.cancelTimer()
   },
   methods: {
     selectAsi() {
-      this.setSearch(new URLSearchParams(this.query))
-      this.setFilter(new URLSearchParams(this.query))
+      this.setSearch(this.updateQuery())
       this.refreshList()
     },
     setSearch(query) {
@@ -113,11 +112,44 @@ export default {
       })
     },
     severityColor(severity) {
-      return this.counts && this.counts[severity] > 0 ? this.$store.getters.getConfig('colors').severity[severity] : 'transparent'
+      return this.counts && this.counts[severity] ? this.$store.getters.getConfig('colors').severity[severity] : 'transparent'
     },
-    getCounts() {
-      return AlertsApi.getCounts(new URLSearchParams(this.query))
-        .then(response => (this.counts = response.severityCounts))
+    updateQuery() {
+      const countsFilter = this.$store.getters.getConfig('countsFilter')
+      // depending on the type of query, build the search params
+      if (Array.isArray(this.query)) {
+        // reconstruct array into a single query string with boolean search terms
+        const updatedQuery = {}
+        this.query.forEach(([key, value]) => {
+          if (updatedQuery.q === undefined) {
+            updatedQuery.q = `${key}:${value}`
+          } else {
+            updatedQuery.q = `(${updatedQuery.q}) AND ${key}:${value}`
+          }
+        })
+        if (countsFilter) {
+          updatedQuery.q = `(${updatedQuery.q}) AND status:${countsFilter}`
+        }
+        return updatedQuery
+      } else if (typeof this.query === 'object') {
+        // deep copy this.query
+        const updatedQuery = JSON.parse(JSON.stringify(this.query))
+        // if countsFilter is set, add it to the query and replace it in object
+        if (countsFilter) {
+          updatedQuery.q = `(${this.query.q}) AND status:${countsFilter}`
+        }
+        return updatedQuery
+      } else {
+        const updatedQuery = {q: this.query.toString()}
+        if (countsFilter) {
+          updatedQuery.q = `${this.query.toString()}&status=${countsFilter}`
+        }
+        return updatedQuery
+      }
+    },
+    async getCounts() {
+      const response = await AlertsApi.getCounts(new URLSearchParams(this.updateQuery()))
+      this.counts = response.severityCounts
     },
     getMostSevere() {
       let paramsWithOpenStatus = new URLSearchParams(this.query)

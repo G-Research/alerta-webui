@@ -7,16 +7,16 @@
       <v-form ref="form">
         <v-card>
           <v-card-title>
-            <span class="headline">
+            <span class="text-h5">
               {{ formTitle }}
             </span>
           </v-card-title>
 
           <v-card-text>
             <v-container grid-list-md>
-              <v-layout wrap>
-                <v-flex
-                  xs12
+              <v-row wrap>
+                <v-col
+                  xs="12"
                 >
                   <v-text-field
                     v-model.trim="editedItem.match"
@@ -26,41 +26,41 @@
                     :rules="[rules.required]"
                     required
                   />
-                  <v-flex
-                    xs12
+                  <v-col
+                    xs="12"
                   >
                     <v-chip
                       v-show="editedItem.customer"
-                      close
+                      closable
                       @click="editedItem.customer = null"
                     >
                       <strong>{{ editedItem.customer }}</strong>&nbsp;
                       <span>({{ $t('customer') }})</span>
                     </v-chip>
-                  </v-flex>
+                  </v-col>
                   <v-text-field
                     v-model.trim="editedItem.customer"
                     :label="$t('Customer')"
                     :rules="[rules.required]"
                     required
                   />
-                </v-flex>
-              </v-layout>
+                </v-col>
+              </v-row>
             </v-container>
           </v-card-text>
 
           <v-card-actions>
             <v-spacer />
             <v-btn
-              color="blue darken-1"
-              flat
+              color="blue-darken-1"
+              variant="flat"
               @click="close"
             >
               {{ $t('Cancel') }}
             </v-btn>
             <v-btn
-              color="blue darken-1"
-              flat
+              color="blue-darken-1"
+              variant="flat"
               @click="validate"
             >
               {{ $t('Save') }}
@@ -71,7 +71,7 @@
     </v-dialog>
 
     <v-card>
-      <v-card-title class="title">
+      <v-card-title class="text-h6">
         {{ $t('Customers') }}
         <v-spacer />
         <v-text-field
@@ -84,20 +84,17 @@
       </v-card-title>
 
       <v-data-table
-        :headers="headers"
-        :items="customers"
+        :header="headers"
+        :item="customers"
         :rows-per-page-items="rowsPerPageItems"
-        :pagination.sync="pagination"
+        v-model:pagination="pagination"
         class="px-2"
         :search="search"
         :loading="isLoading"
         must-sort
         sort-icon="arrow_drop_down"
       >
-        <template
-          slot="items"
-          slot-scope="props"
-        >
+        <template #items="props">
           <td>{{ props.item.match }}</td>
           <td>
             <v-chip>
@@ -113,8 +110,8 @@
               @click="editItem(props.item)"
             >
               <v-icon
-                small
-                color="grey darken-3"
+                size="small"
+                color="grey-darken-3"
               >
                 edit
               </v-icon>
@@ -126,15 +123,15 @@
               @click="deleteItem(props.item)"
             >
               <v-icon
-                small
-                color="grey darken-3"
+                size="small"
+                color="grey-darken-3"
               >
                 delete
               </v-icon>
             </v-btn>
           </td>
         </template>
-        <template slot="no-data">
+        <template #no-data>
           <v-alert
             :value="true"
             color="error"
@@ -143,14 +140,15 @@
             {{ $t('NoDisplay') }}
           </v-alert>
         </template>
-        <v-alert
-          slot="no-results"
-          :value="true"
-          color="error"
-          icon="warning"
-        >
-          {{ $t('SearchNoResult1') }} "{{ search }}" {{ $t('SearchNoResult2') }}
-        </v-alert>
+        <template #no-results>
+          <v-alert
+            :value="true"
+            color="error"
+            icon="warning"
+          >
+            {{ $t('SearchNoResult1') }} "{{ search }}" {{ $t('SearchNoResult2') }}
+          </v-alert>
+        </template>
       </v-data-table>
     </v-card>
 
@@ -181,9 +179,9 @@ export default {
     search: '',
     dialog: false,
     headers: [
-      { text: i18n.t('LookUp'), value: 'match' },
-      { text: i18n.t('Customer'), value: 'customer' },
-      { text: i18n.t('Actions'), value: 'name', sortable: false }
+      { text: i18n.global.t('LookUp'), value: 'match' },
+      { text: i18n.global.t('Customer'), value: 'customer' },
+      { text: i18n.global.t('Actions'), value: 'name', sortable: false }
     ],
     editedId: null,
     editedItem: {
@@ -195,7 +193,7 @@ export default {
       customer: null
     },
     rules: {
-      required: v => !!v || i18n.t('Required')
+      required: v => !!v || i18n.global.t('Required')
     }
   }),
   computed: {
@@ -206,7 +204,7 @@ export default {
       return this.$store.state.customers.isLoading
     },
     formTitle() {
-      return !this.editedId ? i18n.t('NewCustomer') : i18n.t('EditCustomer')
+      return !this.editedId ? i18n.global.t('NewCustomer') : i18n.global.t('EditCustomer')
     },
     refresh() {
       return this.$store.state.refresh
@@ -233,7 +231,7 @@ export default {
       this.dialog = true
     },
     deleteItem(item) {
-      confirm(i18n.t('ConfirmDelete')) &&
+      confirm(i18n.global.t('ConfirmDelete')) &&
         this.$store.dispatch('customers/deleteCustomer', item.id)
     },
     close() {
@@ -242,7 +240,7 @@ export default {
         this.$refs.form.reset()
         this.editedItem = Object.assign({}, this.defaultItem)
         this.editedId = null
-      }, 300)
+      }, 100)
     },
     validate() {
       if (this.$refs.form.validate()) {

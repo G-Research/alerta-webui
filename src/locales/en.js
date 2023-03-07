@@ -70,6 +70,7 @@ export const en = {
   Unshelve: 'Unshelve',
   Close: 'Close',
   Watch: 'Watch',
+  Notes: 'Notes',
   Unwatch: 'Unwatch',
   AddNote: 'Add note',
   Delete: 'Delete',
@@ -91,6 +92,7 @@ export const en = {
   Environment: 'Environment',
   Resource: 'Resource',
   Event: 'Event',
+  Info: 'Info',
   Correlate: 'Correlate',
   Group: 'Group',
   Severity: 'Severity',
@@ -371,6 +373,9 @@ export const en = {
   SearchNoResult1: 'Your search for ',
   SearchNoResult2: 'found no results.',
   OK: 'OK',
+
+  // Services
+  Jira: 'Jira',
 
   // ENDS.
 }

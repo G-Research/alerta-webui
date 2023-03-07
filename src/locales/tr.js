@@ -70,6 +70,7 @@ export const tr = {
   Unshelve: 'Raftan kaldır',
   Close: 'Kapat',
   Watch: 'İzle',
+  Notes: 'Notlar',
   Unwatch: 'İzleme kaldır',
   AddNote: 'Not ekle',
   Delete: 'Sil',
@@ -92,6 +93,7 @@ export const tr = {
   Environment: 'Ortam',
   Resource: 'Kaynak',
   Event: 'Olay',
+  Info: 'Bilgi',
   Correlate: 'İlişkilendir',
   Group: 'Grup',
   Severity: 'Şiddet',
@@ -374,6 +376,9 @@ export const tr = {
   SearchNoResult2: 'için sonuç bulunamadı.',
   // two above paraphrased together to break at the right place. sounds awkward of course
   OK: 'OK',
+
+  // Services
+  Jira: 'Jira',
 
   // ENDS.
 }

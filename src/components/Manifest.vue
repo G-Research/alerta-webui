@@ -1,19 +1,16 @@
 <template>
   <v-data-table
-    :headers="headers"
-    :items="manifest"
+    :header="headers"
+    :item="manifest"
     class="px-2"
     hide-actions
   >
-    <template
-      slot="items"
-      slot-scope="props"
-    >
-      <td class="text-xs-center">
+    <template #items="props">
+      <td class="text-center">
         {{ version }}
       </td>
       <td>
-        <span class="hidden-sm-and-down">{{ application | capitalize }} {{ $t('API') }} </span>{{ props.item.release }}
+        <span class="hidden-sm-and-down">{{ $filters.capitalize(application) }} {{ $t('API') }} </span>{{ props.item.release }}
       </td>
       <td>{{ props.item.build }}</td>
       <td>
@@ -30,12 +27,14 @@
           :href="`https://github.com/alerta/alerta/commit/${props.item.revision}`"
           target="_blank"
         >
-          <v-tooltip right>
-            {{ $t('OpenGitHub') }}
-            <v-icon
-              slot="activator"
-              small
-            >launch</v-icon>
+          <v-tooltip end>
+            <template #activator="{props}">
+              {{ $t('OpenGitHub') }}
+              <v-icon
+                v-bind="props"
+                size="small"
+              >launch</v-icon>
+            </template>
           </v-tooltip>
         </a>
       </td>
@@ -48,16 +47,18 @@
         </a>
         <v-tooltip
           :key="copyIconText"
-          top
+          location="top"
         >
-          <v-icon
-            slot="activator"
-            small
-            class="px-1"
-            @click="clipboardCopy($config.endpoint)"
-          >
-            content_copy
-          </v-icon>
+          <template #activator="{props}">
+            <v-icon
+              v-bind="props"
+              size="small"
+              class="px-1"
+              @click="clipboardCopy($config.endpoint)"
+            >
+              content_copy
+            </v-icon>
+          </template>
           <span>{{ copyIconText }}</span>
         </v-tooltip>
       </td>
@@ -75,15 +76,15 @@ export default {
   },
   data: () => ({
     headers: [
-      {text: i18n.t('WebUI'), value: 'version', sortable: false},
-      {text: i18n.t('API'), value: 'release', sortable: false},
-      {text: i18n.t('Build'), value: 'build', sortable: false},
-      {text: i18n.t('Date'), value: 'date', sortable: false},
-      {text: i18n.t('GitRevision'), value: 'revision', sortable: false},
-      {text: i18n.t('APIEndpoint'), value: 'endpoint', sortable: false}
+      {text: i18n.global.t('WebUI'), value: 'version', sortable: false},
+      {text: i18n.global.t('API'), value: 'release', sortable: false},
+      {text: i18n.global.t('Build'), value: 'build', sortable: false},
+      {text: i18n.global.t('Date'), value: 'date', sortable: false},
+      {text: i18n.global.t('GitRevision'), value: 'revision', sortable: false},
+      {text: i18n.global.t('APIEndpoint'), value: 'endpoint', sortable: false}
     ],
     manifest: [],
-    copyIconText: i18n.t('Copy')
+    copyIconText: i18n.global.t('Copy')
   }),
   computed: {
     application() {
@@ -110,7 +111,7 @@ export default {
       return this.$store.dispatch('management/getManifest')
     },
     clipboardCopy(text) {
-      this.copyIconText = i18n.t('Copied')
+      this.copyIconText = i18n.global.t('Copied')
       let textarea = document.createElement('textarea')
       textarea.textContent = text
       document.body.appendChild(textarea)
@@ -118,7 +119,7 @@ export default {
       document.execCommand('copy')
       document.body.removeChild(textarea)
       setTimeout(() => {
-        this.copyIconText = i18n.t('Copy')
+        this.copyIconText = i18n.global.t('Copy')
       }, 2000)
     }
   }

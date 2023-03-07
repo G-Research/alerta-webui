@@ -70,6 +70,7 @@ export const fr = {
   Unshelve: 'Unshelve',
   Close: 'Close', //'Fermé',
   Watch: 'Watch', //'Surveiller',
+  Notes: 'Remarques', // 'Remarques'
   Unwatch: 'Unwatch', //'Ne plus surveiller',
   AddNote: 'Add note', //'Ajouter Note',
   Delete: 'Delete', //'Supprimer',
@@ -91,6 +92,7 @@ export const fr = {
   Environment: 'Environnement',
   Resource: 'Ressource',
   Event: 'Evénement',
+  Info: 'Info',
   Correlate: 'Corrélation',
   Group: 'Groupe',
   Severity: 'Gravité',
@@ -371,6 +373,9 @@ export const fr = {
   SearchNoResult1: 'Votre recherche pour ',
   SearchNoResult2:  'n\'a trouvée aucun résultat.',
   OK: 'OK',
+
+  // Services
+  Jira: 'Jira',
 
   // ENDS.
 }

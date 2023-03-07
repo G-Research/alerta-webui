@@ -2,7 +2,7 @@
   <div>
     <v-dialog
       v-model="dialog"
-      max-width="500px"
+      max-width="550px"
     >
       <v-form
         ref="form"
@@ -10,18 +10,18 @@
       >
         <v-card>
           <v-card-title>
-            <span class="headline">
+            <span class="text-h5">
               {{ formTitle }}
             </span>
           </v-card-title>
 
           <v-card-text>
             <v-container grid-list-md>
-              <v-layout wrap>
-                <v-flex
-                  xs12
-                  sm6
-                  md9
+              <v-row wrap>
+                <v-col
+                  xs="12"
+                  sm="6"
+                  md="9"
                 >
                   <v-text-field
                     v-model.trim="editedItem.name"
@@ -30,11 +30,11 @@
                     :rules="[rules.required]"
                     required
                   />
-                </v-flex>
-                <v-flex
-                  xs12
-                  sm6
-                  md3
+                </v-col>
+                <v-col
+                  xs="12"
+                  sm="6"
+                  md="3"
                 >
                   <v-switch
                     v-model="editedItem.status"
@@ -42,11 +42,11 @@
                     :false-value="'inactive'"
                     :label="$t('Active')"
                   />
-                </v-flex>
-                <v-flex
-                  xs12
-                  sm6
-                  md9
+                </v-col>
+                <v-col
+                  xs="12"
+                  sm="6"
+                  md="9"
                 >
                   <v-text-field
                     v-model.trim="editedItem.login"
@@ -55,11 +55,11 @@
                     :rules="[rules.required]"
                     required
                   />
-                </v-flex>
-                <v-flex
-                  xs12
-                  sm6
-                  md9
+                </v-col>
+                <v-col
+                  xs="12"
+                  sm="6"
+                  md="9"
                 >
                   <v-text-field
                     v-model.trim="editedItem.email"
@@ -68,21 +68,21 @@
                     :rules="[rules.required]"
                     required
                   />
-                </v-flex>
-                <v-flex
-                  xs12
-                  sm6
-                  md3
+                </v-col>
+                <v-col
+                  xs="12"
+                  sm="6"
+                  md="3"
                 >
                   <v-checkbox
                     v-model="editedItem.email_verified"
                     :label="$t('Verified')"
                   />
-                </v-flex>
+                </v-col>
 
-                <v-flex
-                  xs12
-                  sm6
+                <v-col
+                  xs="12"
+                  sm="6"
                 >
                   <v-text-field
                     v-show="isBasicAuth"
@@ -104,10 +104,10 @@
                     append-icon="visibility"
                     :label="$t('Password')"
                   />
-                </v-flex>
-                <v-flex
-                  xs12
-                  sm6
+                </v-col>
+                <v-col
+                  xs="12"
+                  sm="6"
                 >
                   <v-text-field
                     v-show="isBasicAuth"
@@ -118,7 +118,7 @@
                     :type="showPassword ? 'text' : 'password'"
                     name="input-10-2"
                     :label="$t('ConfirmPassword')"
-                    :value="editedItem.confirmPassword"
+                    :model-value="editedItem.confirmPassword"
                     autocomplete="new-password"
                     @click:append="showPassword = !showPassword"
                   />
@@ -128,43 +128,40 @@
                     append-icon="visibility"
                     :label="$t('ConfirmPassword')"
                   />
-                </v-flex>
+                </v-col>
 
-                <v-flex
-                  xs12
-                  sm6
-                  md12
+                <v-col
+                  xs="12"
+                  sm="6"
+                  md="12"
                 >
                   <v-select
                     v-model="userGroups"
                     :items="allGroups"
                     :label="$t('Groups')"
-                    item-text="name"
+                    item-title="name"
                     item-value="id"
                     chips
-                    solo
+                    variant="solo"
                     multiple
                     :disabled="!editedId"
                   >
-                    <template
-                      slot="selection"
-                      slot-scope="data"
-                    >
+                    <template #selection="data">
                       <v-chip
-                        :selected="data.selected"
-                        close
+                        :value="data.selected"
+                        closable
                       >
                         <strong>{{ data.item.name }}</strong>&nbsp;
                         <span>({{ $t('Group') }})</span>
                       </v-chip>
                     </template>
                   </v-select>
-                </v-flex>
+                </v-col>
 
-                <v-flex
-                  xs12
-                  sm6
-                  md12
+                <v-col
+                  xs="12"
+                  sm="6"
+                  md="12"
                 >
                   <v-autocomplete
                     v-model="editedItem.roles"
@@ -172,49 +169,46 @@
                     :label="$t('Roles')"
                     chips
                     clearable
-                    solo
+                    variant="solo"
                     multiple
                   >
-                    <template
-                      slot="selection"
-                      slot-scope="data"
-                    >
+                    <template #selection="data">
                       <v-chip
-                        :selected="data.selected"
-                        close
+                        :value="data.selected"
+                        closable
                       >
                         <strong>{{ data.item }}</strong>&nbsp;
                         <span>({{ $t('role') }})</span>
                       </v-chip>
                     </template>
                   </v-autocomplete>
-                </v-flex>
-                <v-flex
-                  xs12
-                  sm6
-                  md12
+                </v-col>
+                <v-col
+                  xs="12"
+                  sm="6"
+                  md="12"
                 >
                   <v-text-field
                     v-model.trim="editedItem.text"
                     :label="$t('Comment')"
                   />
-                </v-flex>
-              </v-layout>
+                </v-col>
+              </v-row>
             </v-container>
           </v-card-text>
 
           <v-card-actions>
             <v-spacer />
             <v-btn
-              color="blue darken-1"
-              flat
+              color="blue-darken-1"
+              variant="flat"
               @click="close"
             >
               {{ $t('Cancel') }}
             </v-btn>
             <v-btn
-              color="blue darken-1"
-              flat
+              color="blue-darken-1"
+              variant="flat"
               @click="validate"
             >
               {{ $t('Save') }}
@@ -225,40 +219,44 @@
     </v-dialog>
 
     <v-card>
-      <v-card-title class="title">
+      <v-card-title class="text-h6">
         {{ $t('Users') }}
         <v-spacer />
         <v-btn-toggle
           v-model="status"
-          class="transparent"
+          class="bg-transparent"
           multiple
         >
           <v-btn
             value="active"
-            flat
+            variant="flat"
           >
-            <v-tooltip bottom>
-              <v-icon slot="activator">
-                check_circle
-              </v-icon>
+            <v-tooltip location="bottom">
+              <template #activator="{props}">
+                <v-icon v-bind="props">
+                  check_circle
+                </v-icon>
+              </template>
               <span>{{ $t('Active') }}</span>
             </v-tooltip>
           </v-btn>
           <v-btn
             value="inactive"
-            flat
+            variant="flat"
           >
-            <v-tooltip bottom>
-              <v-icon slot="activator">
-                block
-              </v-icon>
+            <v-tooltip location="bottom">
+              <template #activator="{props}">
+                <v-icon v-bind="props">
+                  block
+                </v-icon>
+              </template>
               <span>{{ $t('Inactive') }}</span>
             </v-tooltip>
           </v-btn>
         </v-btn-toggle>
         <v-spacer />
-        <v-flex
-          xs3
+        <v-col
+          xs="3"
           class="mr-3 pt-3"
         >
           <v-autocomplete
@@ -269,20 +267,19 @@
             multiple
           >
             <template
-              slot="selection"
-              slot-scope="data"
+              #selection="data"
             >
               <v-chip
-                :selected="data.selected"
-                close
+                :value="data.selected"
+                closable
               >
                 <strong>{{ data.item }}</strong>&nbsp;
                 <span>({{ $t('role') }})</span>
               </v-chip>
             </template>
           </v-autocomplete>
-        </v-flex>
-        <v-flex xs6>
+        </v-col>
+        <v-col xs="6">
           <v-text-field
             v-model="search"
             append-icon="search"
@@ -290,14 +287,14 @@
             single-line
             hide-details
           />
-        </v-flex>
+        </v-col>
       </v-card-title>
 
       <v-data-table
-        :headers="headers"
-        :items="users"
+        :header="headers"
+        :item="users"
         :rows-per-page-items="rowsPerPageItems"
-        :pagination.sync="pagination"
+        v-model:pagination="pagination"
         class="px-2"
         :search="search"
         :custom-filter="customFilter"
@@ -305,39 +302,40 @@
         must-sort
         sort-icon="arrow_drop_down"
       >
-        <template
-          slot="items"
-          slot-scope="props"
-        >
+        <template #items="props">
           <td>{{ props.item.name }}</td>
-          <td class="text-xs-center">
-            <v-tooltip top>
-              <v-icon
-                slot="activator"
-                :color="props.item.status == 'active' ? 'primary' : ''"
-                @click="toggleUserStatus(props.item)"
-              >
-                {{
-                  props.item.status === 'active' ? 'toggle_on' : 'toggle_off'
-                }}
-              </v-icon>
-              <span>{{ props.item.status | capitalize }}</span>
+          <td class="text-center">
+            <v-tooltip location="top">
+              <template #activator="{props}">
+                <v-icon
+                  v-bind:="props"
+                  :color="props.item.status == 'active' ? 'primary' : ''"
+                  @click="toggleUserStatus(props.item)"
+                >
+                  {{
+                    props.item.status === 'active' ? 'toggle_on' : 'toggle_off'
+                  }}
+                </v-icon>
+              </template>
+              <span>{{ $filters.capitalize(props.item.status) }}</span>
             </v-tooltip>
           </td>
           <td>{{ props.item.login }}</td>
           <td>{{ props.item.email }}</td>
-          <td class="text-xs-center">
-            <v-tooltip top>
-              <v-icon
-                slot="activator"
-                @click="toggleEmailVerified(props.item)"
-              >
-                {{
-                  props.item.email_verified
-                    ? 'check_box'
-                    : 'check_box_outline_blank'
-                }}
-              </v-icon>
+          <td class="text-center">
+            <v-tooltip location="top">
+              <template #activator="{props}">
+                <v-icon
+                  v-bind="props"
+                  @click="toggleEmailVerified(props.item)"
+                >
+                  {{
+                    props.item.email_verified
+                      ? 'check_box'
+                      : 'check_box_outline_blank'
+                  }}
+                </v-icon>
+              </template>
               <span>
                 {{
                   props.item.email_verified
@@ -356,20 +354,20 @@
               <span>({{ $t('role') }})</span>
             </v-chip>
           </td>
-          <td class="text-xs-right">
+          <td class="text-right">
             <date-time
               :value="props.item.createTime"
               format="mediumDate"
             />
           </td>
-          <td class="text-xs-right">
+          <td class="text-right">
             <date-time
               v-if="props.item.lastLogin"
               :value="props.item.lastLogin"
               format="mediumDate"
             />
           </td>
-          <td class="text-xs-right">
+          <td class="text-right">
             {{ props.item.text }}
           </td>
           <td class="text-no-wrap">
@@ -380,8 +378,8 @@
               @click="editItem(props.item)"
             >
               <v-icon
-                small
-                color="grey darken-3"
+                size="small"
+                color="grey-darken-3"
               >
                 edit
               </v-icon>
@@ -393,15 +391,15 @@
               @click="deleteItem(props.item)"
             >
               <v-icon
-                small
-                color="grey darken-3"
+                size="small"
+                color="grey-darken-3"
               >
                 delete
               </v-icon>
             </v-btn>
           </td>
         </template>
-        <template slot="no-data">
+        <template #no-data>
           <v-alert
             :value="true"
             color="error"
@@ -410,14 +408,15 @@
             {{ $t('NoDisplay') }}
           </v-alert>
         </template>
-        <v-alert
-          slot="no-results"
-          :value="true"
-          color="error"
-          icon="warning"
-        >
-          {{ $t('SearchNoResult1') }} "{{ search }}" {{ $t('SearchNoResult2') }}.
-        </v-alert>
+        <template #no-results>
+          <v-alert
+            :value="true"
+            color="error"
+            icon="warning"
+          >
+            {{ $t('SearchNoResult1') }} "{{ search }}" {{ $t('SearchNoResult2') }}.
+          </v-alert>
+        </template>
       </v-data-table>
     </v-card>
 
@@ -453,16 +452,16 @@ export default {
     wantRoles: [],
     dialog: false,
     headers: [
-      { text: i18n.t('Name'), value: 'name' },
-      { text: i18n.t('Status'), value: 'status' },
-      { text: i18n.t('Login'), value: 'login' },
-      { text: i18n.t('Email'), value: 'email' },
-      { text: i18n.t('VerifiedOrNot'), value: 'email_verified' },
-      { text: i18n.t('Roles'), value: 'roles' },
-      { text: i18n.t('Created'), value: 'createTime' },
-      { text: i18n.t('LastLogin'), value: 'lastLogin' },
-      { text: i18n.t('Comment'), value: 'text' },
-      { text: i18n.t('Actions'), value: 'name', sortable: false }
+      { text: i18n.global.t('Name'), value: 'name' },
+      { text: i18n.global.t('Status'), value: 'status' },
+      { text: i18n.global.t('Login'), value: 'login' },
+      { text: i18n.global.t('Email'), value: 'email' },
+      { text: i18n.global.t('VerifiedOrNot'), value: 'email_verified' },
+      { text: i18n.global.t('Roles'), value: 'roles' },
+      { text: i18n.global.t('Created'), value: 'createTime' },
+      { text: i18n.global.t('LastLogin'), value: 'lastLogin' },
+      { text: i18n.global.t('Comment'), value: 'text' },
+      { text: i18n.global.t('Actions'), value: 'name', sortable: false }
     ],
     editedId: null,
     editedItem: {
@@ -490,10 +489,10 @@ export default {
     },
     showPassword: false,
     rules: {
-      required: v => !!v || i18n.t('Required'),
-      min: v => (vm.editedId && v == null) || (v && v.length >= 6) || i18n.t('Min6Char'),
+      required: v => !!v || i18n.global.t('Required'),
+      min: v => (vm.editedId && v == null) || (v && v.length >= 6) || i18n.global.t('Min6Char'),
       passwordMatch: v =>
-        (vm.editedId && v == null) || (v && v == vm.editedItem.password) || i18n.t('PasswordNotMatch')
+        (vm.editedId && v == null) || (v && v == vm.editedItem.password) || i18n.global.t('PasswordNotMatch')
     }
   }),
   computed: {
@@ -521,7 +520,7 @@ export default {
       return this.$store.state.users.isLoading
     },
     formTitle() {
-      return !this.editedId ? i18n.t('NewUser') : i18n.t('EditUser')
+      return !this.editedId ? i18n.global.t('NewUser') : i18n.global.t('EditUser')
     },
     refresh() {
       return this.$store.state.refresh
@@ -589,7 +588,7 @@ export default {
       this.dialog = true
     },
     deleteItem(item) {
-      confirm(i18n.t('ConfirmDelete')) &&
+      confirm(i18n.global.t('ConfirmDelete')) &&
         this.$store.dispatch('users/deleteUser', item.id)
     },
     close() {
@@ -598,7 +597,7 @@ export default {
         this.$refs.form.resetValidation()
         this.editedItem = Object.assign({}, this.defaultItem)
         this.editedId = null
-      }, 300)
+      }, 100)
     },
     validate() {
       if (this.$refs.form.validate()) {

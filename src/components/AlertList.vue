@@ -1,23 +1,23 @@
 <template>
   <div>
+    <!-- sort-icon might need to be moved to header slot -->
     <v-data-table
       v-model="selected"
-      :headers="customHeaders"
-      :items="alerts"
+      :header="customHeaders"
+      :item="alerts"
       item-key="id"
-      :pagination.sync="pagination"
+      v-model:pagination="pagination"
       :total-items="pagination.totalItems"
       :rows-per-page-items="pagination.rowsPerPageItems"
       :loading="isSearching"
       class="alert-table"
       :class="[ displayDensity ]"
       :style="columnWidths"
-      sort-icon="arrow_drop_down"
-      select-all
+      sort-icon="arrow_drop_down" 
+      show-select
     >
       <template
-        slot="items"
-        slot-scope="props"
+        #items="props"
       >
         <tr
           :style="{ 'background-color': severityColor(props.item.severity) }"
@@ -73,7 +73,7 @@
             <span
               v-if="col == 'id'"
             >
-              {{ props.item.id | shortId }}
+              {{ $filters.shortId(props.item.id) }}
             </span>
             <span
               v-if="col == 'resource'"
@@ -85,6 +85,19 @@
             >
               {{ props.item.event }}
             </span>
+
+            <!-- Additional column for operational runbook links -->
+            <span
+              v-if="col == 'info'"
+            >
+              <div
+                v-for="data in $config.runbook"
+                :key="data.output"
+              >                
+                <div>{{ findMatch(data,props) }}</div>
+              </div>
+            </span>
+            
             <span
               v-if="col == 'environment'"
             >
@@ -97,8 +110,20 @@
                 :class="['label', 'label-' + props.item.severity.toLowerCase()]"
                 :style="fontStyle"
               >
-                {{ props.item.severity | capitalize }}
+                {{ $filters.capitalize(props.item.severity) }}
               </span>
+            </span>
+            <!-- Additional column for jira links -->
+            <span
+              v-if="col == 'jira' && alertHasJira(props.item)"
+            >
+              <a
+                :href="props.item.attributes.jira.url"
+                target="_blank"
+                @click.stop
+              >
+                {{ props.item.attributes.jira.key }}
+              </a>
             </span>
             <span
               v-if="col == 'correlate'"
@@ -112,7 +137,7 @@
                 class="label"
                 :style="fontStyle"
               >
-                {{ props.item.status | capitalize }}
+                {{ $filters.capitalize(props.item.status) }}
 
               </span>
               <span
@@ -122,11 +147,11 @@
                   v-if="lastNote(props.item)"
                   class="pl-2"
                 >
-                  <v-tooltip bottom>
-                    <template v-slot:activator="{ on, attrs }">
+                  <v-tooltip location="bottom">
+                    <template #activator="{ on, attrs }">
                       <v-icon
                         v-bind="attrs"
-                        small
+                        size="small"
                         v-on="on"
                       >text_snippet</v-icon>
                     </template>
@@ -150,7 +175,7 @@
             >
               <div class="fixed-table">
                 <div class="text-truncate">
-                  <span v-html="props.item.value" />
+                  <span>{{ props.item.value }}</span>
                 </div>
               </div>
             </span>
@@ -159,7 +184,7 @@
             >
               <div class="fixed-table">
                 <div class="text-truncate">
-                  <span v-html="props.item.text" />
+                  <span>{{ props.item.text }}</span>
                 </div>
               </div>
             </span>
@@ -175,9 +200,9 @@
               >{{ tag }}</span>&nbsp;</span>
             </span>
             <span
-              v-if="props.item.attributes.hasOwnProperty(col)"
+              v-if="props.item.attributes.hasOwnProperty(col) && col != 'jira'"
             >
-              <span v-html="props.item.attributes[col]" />
+              <span>{{ props.item.attributes[col] }}</span>
             </span>
             <span
               v-if="col == 'origin'"
@@ -191,7 +216,7 @@
                 class="label"
                 :style="fontStyle"
               >
-                {{ props.item.type | splitCaps }}
+                {{ $filters.splitCaps(props.item.type) }}
               </span>
             </span>
             <span
@@ -205,13 +230,13 @@
             <span
               v-if="col == 'timeout'"
             >
-              {{ props.item.timeout | hhmmss }}
+              {{ $filter.hhmmss(props.item.timeout) }}
             </span>
             <span
               v-if="col == 'timeoutLeft'"
-              class="text-xs-right"
+              class="text-right"
             >
-              {{ timeoutLeft(props.item) | hhmmss }}
+              {{ $filters.hhmmss(timeoutLeft(props.item)) }}
             </span>
             <!-- rawData not supported -->
             <span
@@ -231,7 +256,7 @@
                 class="label"
                 :style="fontStyle"
               >
-                {{ props.item.repeat | capitalize }}
+                {{ $filters.capitalize(props.item.repeat) }}
               </span>
             </span>
             <span
@@ -241,7 +266,7 @@
                 :class="['label', 'label-' + props.item.previousSeverity.toLowerCase()]"
                 :style="fontStyle"
               >
-                {{ props.item.previousSeverity | capitalize }}
+                {{ $filters.capitalize(props.item.previousSeverity) }}
               </span>
             </span>
             <!-- trendIndication not supported -->
@@ -255,14 +280,14 @@
             </span>
             <span
               v-if="col == 'duration'"
-              class="text-xs-right"
+              class="text-right"
             >
-              {{ duration(props.item) | hhmmss }}
+              {{ $filters.hhmmss(duration(props.item)) }}
             </span>
             <span
               v-if="col == 'lastReceiveId'"
             >
-              {{ props.item.lastReceiveId | shortId }}
+              {{ $filters.shortId(props.item.lastReceiveId) }}
             </span>
             <span
               v-if="col == 'lastReceiveTime'"
@@ -289,9 +314,9 @@
               ...&nbsp;
               <v-btn
                 v-if="isAcked(props.item.status) || isClosed(props.item.status)"
-                flat
+                variant="flat"
                 icon
-                small
+                size="small"
                 class="btn--plain pa-0 ma-0"
                 @click.stop="takeAction(props.item.id, 'open')"
               >
@@ -304,9 +329,9 @@
 
               <v-btn
                 v-if="!isWatched(props.item.tags)"
-                flat
+                variant="flat"
                 icon
-                small
+                size="small"
                 class="btn--plain pa-0 ma-0"
                 @click.stop="watchAlert(props.item.id)"
               >
@@ -318,9 +343,9 @@
               </v-btn>
               <v-btn
                 v-if="isWatched(props.item.tags)"
-                flat
+                variant="flat"
                 icon
-                small
+                size="small"
                 class="btn--plain pa-0 ma-0"
                 @click.stop="unwatchAlert(props.item.id)"
               >
@@ -333,9 +358,9 @@
 
               <v-btn
                 v-if="isOpen(props.item.status)"
-                flat
+                variant="flat"
                 icon
-                small
+                size="small"
                 class="btn--plain pa-0 ma-0"
                 @click.stop="ackAlert(props.item.id)"
               >
@@ -347,9 +372,9 @@
               </v-btn>
               <v-btn
                 v-if="isAcked(props.item.status)"
-                flat
+                variant="flat"
                 icon
-                small
+                size="small"
                 class="btn--plain pa-0 ma-0"
                 @click.stop="takeAction(props.item.id, 'unack')"
               >
@@ -362,9 +387,9 @@
 
               <v-btn
                 v-if="isOpen(props.item.status) || isAcked(props.item.status)"
-                flat
+                variant="flat"
                 icon
-                small
+                size="small"
                 class="btn--plain pa-0 ma-0"
                 @click.stop="shelveAlert(props.item.id)"
               >
@@ -376,9 +401,9 @@
               </v-btn>
               <v-btn
                 v-if="isShelved(props.item.status)"
-                flat
+                variant="flat"
                 icon
-                small
+                size="small"
                 class="btn--plain pa-0 ma-0"
                 @click.stop="takeAction(props.item.id, 'unshelve')"
               >
@@ -391,9 +416,9 @@
 
               <v-btn
                 v-if="!isClosed(props.item.status)"
-                flat
+                variant="flat"
                 icon
-                small
+                size="small"
                 class="btn--plain pa-0 ma-0"
                 @click.stop="takeAction(props.item.id, 'close')"
               >
@@ -404,9 +429,9 @@
                 </v-icon>
               </v-btn>
               <v-btn
-                flat
+                variant="flat"
                 icon
-                small
+                size="small"
                 class="btn--plain pa-0 ma-0"
                 @click.stop="deleteAlert(props.item.id)"
               >
@@ -431,41 +456,43 @@
               </v-btn> -->
 
               <v-menu
-                bottom
-                left
+                location="bottom"
+                start
               >
-                <v-btn
-                  slot="activator"
-                  flat
-                  icon
-                  small
-                  class="btn--plain pa-0 ma-0"
-                >
-                  <v-icon small>
-                    more_vert
-                  </v-icon>
-                </v-btn>
+                <template #activator="{props}">
+                  <v-btn
+                    v-bind="props"
+                    variant="flat"
+                    icon
+                    size="small"
+                    class="btn--plain pa-0 ma-0"
+                  >
+                    <v-icon size="small">
+                      more_vert
+                    </v-icon>
+                  </v-btn>
+                </template>
 
                 <v-list
                   subheader
                 >
-                  <v-subheader>Actions</v-subheader>
+                  <v-list-subheader>Actions</v-list-subheader>
                   <v-divider />
-                  <v-list-tile
+                  <v-list-item
                     v-for="(action, i) in actions"
                     :key="i"
                     @click.stop="takeAction(props.item.id, action)"
                   >
-                    <v-list-tile-title>{{ action | splitCaps }}</v-list-tile-title>
-                  </v-list-tile>
+                    <v-list-item-title>{{ $filters.splitCaps(action) }}</v-list-item-title>
+                  </v-list-item>
                 </v-list>
               </v-menu>
             </div>
           </td>
         </tr>
       </template>
-      <template slot="no-data">
-        <div class="text-xs-center">
+      <template #no-data>
+        <div class="text-center">
           <span v-if="isLoading">{{ $t('Loading') }}...</span>
           <span v-if="!isLoading">{{ $t('NoDataAvailable') }}</span>
         </div>
@@ -494,39 +521,41 @@ export default {
   data: vm => ({
     search: '',
     headersMap: {
-      id: { text: i18n.t('AlertId'), value: 'id' },
-      resource: { text: i18n.t('Resource'), value: 'resource' },
-      event: { text: i18n.t('Event'), value: 'event' },
-      environment: { text: i18n.t('Environment'), value: 'environment' },
-      severity: { text: i18n.t('Severity'), value: 'severity' },
-      correlate: { text: i18n.t('Correlate'), value: 'correlate' },
-      status: { text: i18n.t('Status'), value: 'status' },
-      service: { text: i18n.t('Service'), value: 'service' },
-      group: { text: i18n.t('Group'), value: 'group' },
-      value: { text: i18n.t('Value'), value: 'value', class: 'value-header' },
-      text: { text: i18n.t('Description'), value: 'text', class: 'text-header' },
-      tags: { text: i18n.t('Tags'), value: 'tags' },
-      attributes: { text: i18n.t('Attribute'), value: 'attributes' },
-      origin: { text: i18n.t('Origin'), value: 'origin' },
-      type: { text: i18n.t('Type'), value: 'type' },
-      createTime: { text: i18n.t('CreateTime'), value: 'createTime' },
-      timeout: { text: i18n.t('Timeout'), value: 'timeout' },
-      timeoutLeft: { text: i18n.t('TimeoutLeft'), value: 'timeoutLeft' },
-      customer: { text: i18n.t('Customer'), value: 'customer' },
-      duplicateCount: { text: i18n.t('Dupl'), value: 'duplicateCount' },
-      repeat: { text: i18n.t('Repeat'), value: 'repeat' },
-      previousSeverity: { text: i18n.t('PrevSeverity'), value: 'previousSeverity' },
-      trendIndication: { text: i18n.t('TrendIndication'), value: 'trendIndication' },
-      receiveTime: { text: i18n.t('ReceiveTime'), value: 'receiveTime' },
-      duration: { text: i18n.t('Duration'), value: 'duration' },
-      lastReceiveId: { text: i18n.t('LastReceiveId'), value: 'lastReceiveId' },
-      lastReceiveTime: { text: i18n.t('LastReceiveTime'), value: 'lastReceiveTime' },
-      note: { text: i18n.t('LastNote'), value: 'note', sortable: false }
+      id: { text: i18n.global.t('AlertId'), value: 'id' },
+      resource: { text: i18n.global.t('Resource'), value: 'resource' },
+      event: { text: i18n.global.t('Event'), value: 'event' },
+      info: { text: i18n.global.t('Info'), value: 'info', sortable: false },
+      environment: { text: i18n.global.t('Environment'), value: 'environment' },
+      severity: { text: i18n.global.t('Severity'), value: 'severity' },
+      correlate: { text: i18n.global.t('Correlate'), value: 'correlate' },
+      status: { text: i18n.global.t('Status'), value: 'status' },
+      service: { text: i18n.global.t('Service'), value: 'service' },
+      group: { text: i18n.global.t('Group'), value: 'group' },
+      value: { text: i18n.global.t('Value'), value: 'value', class: 'value-header' },
+      text: { text: i18n.global.t('Description'), value: 'text', class: 'text-header' },
+      tags: { text: i18n.global.t('Tags'), value: 'tags' },
+      attributes: { text: i18n.global.t('Attribute'), value: 'attributes' },
+      origin: { text: i18n.global.t('Origin'), value: 'origin' },
+      type: { text: i18n.global.t('Type'), value: 'type' },
+      createTime: { text: i18n.global.t('CreateTime'), value: 'createTime' },
+      timeout: { text: i18n.global.t('Timeout'), value: 'timeout' },
+      timeoutLeft: { text: i18n.global.t('TimeoutLeft'), value: 'timeoutLeft' },
+      customer: { text: i18n.global.t('Customer'), value: 'customer' },
+      duplicateCount: { text: i18n.global.t('Dupl'), value: 'duplicateCount' },
+      repeat: { text: i18n.global.t('Repeat'), value: 'repeat' },
+      previousSeverity: { text: i18n.global.t('PrevSeverity'), value: 'previousSeverity' },
+      trendIndication: { text: i18n.global.t('TrendIndication'), value: 'trendIndication' },
+      receiveTime: { text: i18n.global.t('ReceiveTime'), value: 'receiveTime' },
+      duration: { text: i18n.global.t('Duration'), value: 'duration' },
+      lastReceiveId: { text: i18n.global.t('LastReceiveId'), value: 'lastReceiveId' },
+      lastReceiveTime: { text: i18n.global.t('LastReceiveTime'), value: 'lastReceiveTime' },
+      note: { text: i18n.global.t('LastNote'), value: 'note', sortable: false }
     },
     details: false,
     selectedId: null,
     multiselect: false,
-    timer: null
+    timer: null,
+    shiftDown: false
   }),
   computed: {
     displayDensity() {
@@ -548,8 +577,9 @@ export default {
     },
     columnWidths() {
       return {
-        '--value-width': this.valueWidth() + 'px',
-        '--text-width': this.textWidth() + 'px'
+        // '--value-width': this.valueWidth() + 'px',
+        // '--text-width': this.textWidth() + 'px'
+        // altered to prevent overflow and odd spacing in last column
       }
     },
     isLoading() {
@@ -590,8 +620,30 @@ export default {
       get() {
         return this.$store.state.alerts.selected
       },
-      set(value) {
-        this.$store.dispatch('alerts/updateSelected', value)
+      set(values) {
+        const alerts = this.$store.state.alerts.alerts
+        if (this.shiftDown) {
+          // check if there is a gap between selected and previously
+          let indexes = []
+          for (let i = 0; i < values.length; i++) {
+            const alertIndex = alerts.findIndex((x => x.id === values[i].id))
+            indexes.push(alertIndex)
+            if (i > 0) {
+              if (Math.abs(alertIndex - indexes[i - 1]) > 1) {
+                const lowIndex = Math.min(alertIndex, indexes[i - 1])
+                const highIndex = Math.max(alertIndex, indexes[i - 1])
+                // fill in all the missing alerts
+                for (let j = lowIndex + 1; j < highIndex; j++) {
+                  // check if alert is already in the list
+                  if (!values.find(alert => alert.id === alerts[j].id)) {
+                    values.push(alerts[j])
+                  }
+                }
+              }
+            }
+          }
+        }
+        this.$store.dispatch('alerts/updateSelected', values)
       }
     },
     ackTimeout() {
@@ -609,7 +661,35 @@ export default {
       this.pagination = Object.assign({}, this.pagination, {rowsPerPage: val})
     }
   },
-  methods: {
+  created() {
+    this.initHotkeys()
+  },
+  methods: {   
+    // method for mapping table data to links from runbook data
+    findMatch(additionalRespObj, props){   
+      const validMatch = additionalRespObj.matches.every(matchesObj => {
+        // make comparisons case-insensitive
+        const filter = new RegExp((matchesObj.regex).toLowerCase())
+        const columnName = (matchesObj.column).toLowerCase()
+        const columnData = (props.item[columnName]).toLowerCase()
+        return filter.test(columnData)
+      })
+      // return link if all regex checks pass
+      return validMatch ? additionalRespObj.output : null 
+    },
+    initHotkeys() {
+      window.addEventListener('keydown', this.processHotkey)
+      window.addEventListener('keyup', this.removeHotkey)
+    },
+    processHotkey(event) {
+      event.code === 'ShiftLeft' || event.code === 'ShiftRight' ? this.shiftDown = true : 0
+    },
+    removeHotkey(event) {
+      event.code === 'ShiftLeft' || event.code === 'ShiftRight' ? this.shiftDown = false : 0
+    },
+    alertHasJira(alert) {
+      return alert.attributes.hasOwnProperty('jira')
+    },
     duration(item) {
       return moment.duration(moment().diff(moment(item.receiveTime)))
     },
@@ -686,7 +766,7 @@ export default {
         .then(() => this.$store.dispatch('alerts/getAlerts'))
     }, 200, {leading: true, trailing: false}),
     deleteAlert: debounce(function(id) {
-      confirm(i18n.t('ConfirmDelete')) &&
+      confirm(i18n.global.t('ConfirmDelete')) &&
         this.$store.dispatch('alerts/deleteAlert', id)
           .then(() => this.$store.dispatch('alerts/getAlerts'))
     }, 200, {leading: true, trailing: false}),
@@ -812,7 +892,7 @@ div.select-box {
 }
 
 div.action-buttons {
-  position: absolute;
+  position: relative;
   opacity: 0;
   right: 0;
   top: 0.5em;

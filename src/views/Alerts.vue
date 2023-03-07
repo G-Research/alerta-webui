@@ -12,7 +12,7 @@
       <v-form ref="form">
         <v-card>
           <v-card-title class="justify-center">
-            <span class="title">
+            <span class="text-h6">
               {{ $t('ChooseDisplayDensity') }}
             </span>
           </v-card-title>
@@ -35,8 +35,8 @@
           <v-card-actions>
             <v-spacer />
             <v-btn
-              color="blue darken-1"
-              flat
+              color="blue-darken-1"
+              variant="flat"
               @click="ok"
             >
               {{ $t('OK') }}
@@ -51,20 +51,20 @@
         v-if="showPanel"
         class="px-1"
       >
-        <v-layout wrap>
-          <v-flex
+        <v-row wrap>
+          <v-col
             v-for="(indicator, index) in indicators"
             :key="index"
-            xs12
-            sm6
-            md3
+            xs="12"
+            sm="6"
+            md="3"
           >
             <alert-indicator
               :title="indicator.text"
               :query="indicator.query"
             />
-          </v-flex>
-        </v-layout>
+          </v-col>
+        </v-row>
         <v-divider />
       </div>
     </v-expand-transition>
@@ -84,7 +84,7 @@
       </v-tab>
       <v-spacer />
       <v-btn
-        flat
+        variant="flat"
         icon
         :class="{ 'filter-active': isActive }"
         @click="sidesheet = !sidesheet"
@@ -93,60 +93,63 @@
       </v-btn>
 
       <v-menu
-        bottom
-        left
+        location="left bottom"
       >
-        <v-btn
-          slot="activator"
-          flat
-          icon
-        >
-          <v-icon>more_vert</v-icon>
-        </v-btn>
+        <template #activator="{props}">
+          <v-btn
+            v-bind="props"
+            variant="flat"
+            icon
+          >
+            <v-icon>more_vert</v-icon>
+          </v-btn>
+        </template>
 
         <v-list>
-          <v-list-tile
+          <v-list-item
             :disabled="!indicators.length"
             @click="showPanel = !showPanel"
           >
-            <v-list-tile-title>
+            <v-list-item-title>
               {{ showPanel ? $t('Hide') : $t('Show') }} {{ $t('Panel') }}
-            </v-list-tile-title>
-          </v-list-tile>
-          <v-list-tile
+            </v-list-item-title>
+          </v-list-item>
+          <v-list-item
             @click="densityDialog = true"
           >
             {{ $t('DisplayDensity') }}
-          </v-list-tile>
-          <v-list-tile
+          </v-list-item>
+          <v-list-item
             @click="toCsv(alertsByEnvironment)"
           >
             {{ $t('DownloadAsCsv') }}
-          </v-list-tile>
+          </v-list-item>
         </v-list>
       </v-menu>
 
       <span class="pr-2" />
-
-      <v-tabs-items
-        v-model="currentTab"
-      >
-        <v-tab-item
-          v-for="env in environments"
-          :key="env"
-          :value="'tab-' + env"
-          :transition="false"
-          :reverse-transition="false"
+      
+      <v-window>
+        <v-window-item
+          v-model="currentTab"
         >
-          <keep-alive max="1">
-            <alert-list
-              v-if="env == filter.environment || env == 'ALL'"
-              :alerts="alertsByEnvironment"
-              @set-alert="setAlert"
-            />
-          </keep-alive>
-        </v-tab-item>
-      </v-tabs-items>
+          <v-window-item
+            v-for="env in environments"
+            :key="env"
+            :value="'tab-' + env"
+            :transition="false"
+            :reverse-transition="false"
+          >
+            <keep-alive max="1">
+              <alert-list
+                v-if="env == filter.environment || env == 'ALL'"
+                :alerts="alertsByEnvironment"
+                @set-alert="setAlert"
+              />
+            </keep-alive>
+          </v-window-item>
+        </v-window-item>
+      </v-window>
     </v-tabs>
 
     <alert-list-filter
@@ -157,6 +160,7 @@
 </template>
 
 <script>
+import { defineAsyncComponent } from 'vue'
 import AlertList from '@/components/AlertList.vue'
 
 import moment from 'moment'
@@ -167,8 +171,8 @@ import i18n from '@/plugins/i18n'
 export default {
   components: {
     AlertList,
-    AlertIndicator: () => import('@/components/AlertIndicator.vue'),
-    AlertListFilter: () => import('@/components/AlertListFilter.vue')
+    AlertIndicator: defineAsyncComponent(() => import('@/components/AlertIndicator.vue')) ,
+    AlertListFilter: defineAsyncComponent(() => import('@/components/AlertListFilter.vue'))
   },
   props: {
     query: {
@@ -295,17 +299,19 @@ export default {
       this.setPage(1)
     },
     filter: {
-      handler(val) {
-        history.pushState(null, null, this.$store.getters['alerts/getHash'])
+      async handler(val) {
+        await this.$router.push(this.$store.getters['alerts/getHash'])
+        history.replaceState({...history.state}, null)
         this.currentTab = this.defaultTab
         this.cancelTimer()
         this.refreshAlerts()
       },
       deep: true
     },
-    pagination: {
-      handler(newVal, oldVal) {
-        history.pushState(null, null, this.$store.getters['alerts/getHash'])
+    pagination: { 
+      async handler(newVal, oldVal) {
+        await this.$router.push(this.$store.getters['alerts/getHash'])
+        history.replaceState({...history.state}, null)
         if (oldVal.page != newVal.page ||
           oldVal.rowsPerPage != newVal.rowsPerPage ||
           oldVal.sortBy != newVal.sortBy ||
@@ -319,8 +325,9 @@ export default {
     refresh(val) {
       val || this.getAlerts() && this.getEnvironments()
     },
-    showPanel(val) {
-      history.pushState(null, null, this.$store.getters['alerts/getHash'])
+    async showPanel(val) {
+      await this.$router.push(this.$store.getters['alerts/getHash'])
+      history.replaceState({...history.state}, null)
     }
   },
   created() {
@@ -336,7 +343,7 @@ export default {
     this.cancelTimer()
     this.refreshAlerts()
   },
-  beforeDestroy() {
+  beforeUnmount() {
     this.cancelTimer()
   },
   methods: {

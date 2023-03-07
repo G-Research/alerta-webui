@@ -7,66 +7,67 @@
       <v-form ref="form">
         <v-card>
           <v-card-title>
-            <span class="headline">
+            <span class="text-h5">
               {{ formTitle }}
             </span>
           </v-card-title>
 
           <v-card-text>
             <v-container grid-list-md>
-              <v-layout wrap>
-                <v-flex
-                  xs12
+              <v-row wrap>
+                <v-col
+                  xs="12"
                 >
                   <v-tooltip
                     :key="copyIconText"
-                    right
+                    end
                   >
-                    <v-text-field
-                      v-if="editedItem.key"
-                      slot="activator"
-                      v-model="editedItem.key"
-                      :label="$t('APIKey')"
-                      readonly
-                      monospace
-                      append-icon="content_copy"
-                      @click:append="clipboardCopy(editedItem.key)"
-                    />
+                    <template #activator>
+                      <v-text-field
+                        v-if="editedItem.key"
+                        v-model="editedItem.key"
+                        :label="$t('APIKey')"
+                        readonly
+                        monospace
+                        append-icon="content_copy"
+                        @click:append="clipboardCopy(editedItem.key)"
+                      />
+                    </template>
                     <span>{{ copyIconText }}</span>
                   </v-tooltip>
-                </v-flex>
-                <v-flex
+                </v-col>
+                <v-col
                   v-if="!isAdmin"
-                  xs12
+                  xs="12"
                 >
                   <v-text-field
                     v-model="editedItem.user"
                     :label="$t('User')"
                     readonly
                   />
-                </v-flex>
-                <v-flex
+                </v-col>
+                <v-col
                   v-if="isAdmin"
-                  xs12
+                  xs="12"
                 >
                   <v-select
                     v-model="editedItem.user"
                     :items="users"
                     :label="$t('User')"
                   />
-                </v-flex>
-                <v-flex
+                </v-col>
+                <v-col
                   v-if="$config.customer_views"
-                  xs12
+                  xs="12"
                 >
                   <v-select
                     v-model="editedItem.customer"
                     :items="allowedCustomers"
                     :label="$t('Customer')"
                   />
-                </v-flex>
-                <v-flex
-                  xs12
+                </v-col>
+                <v-col
+                  xs="12"
                 >
                   <v-autocomplete
                     v-model="editedItem.scopes"
@@ -74,74 +75,74 @@
                     :label="$t('Scopes')"
                     chips
                     clearable
-                    solo
+                    variant="solo"
                     multiple
                   >
                     <template
-                      slot="selection"
-                      slot-scope="data"
+                      #selection="data"
                     >
                       <v-chip
-                        :selected="data.selected"
-                        close
+                        :value="data.selected"
+                        closable
                       >
                         <strong>{{ data.item }}</strong>&nbsp;
                         <span>({{ $t('scope') }})</span>
                       </v-chip>
                     </template>
                   </v-autocomplete>
-                </v-flex>
-                <v-flex
-                  xs12
+                </v-col>
+                <v-col
+                  xs="12"
                 >
                   <v-menu
                     v-model="menu"
                     :close-on-content-click="false"
-                    :nudge-right="40"
+                    :offset="40"
                     lazy
                     transition="scale-transition"
-                    offset-y
                     full-width
                     min-width="290px"
                   >
-                    <v-text-field
-                      slot="activator"
-                      v-model="pickerDate"
-                      :label="$t('Expires')"
-                      prepend-icon="event"
-                      readonly
-                    />
+                    <template #activator>
+                      <v-text-field
+                        v-model="pickerDate"
+                        :label="$t('Expires')"
+                        prepend-icon="event"
+                        readonly
+                      />
+                    </template>
+
                     <v-date-picker
                       v-model="pickerDate"
                       :min="new Date().toISOString().slice(0, 10)"
-                      @input="menu = false"
+                      @update:model-value="menu = false"
                     />
                   </v-menu>
-                </v-flex>
-                <v-flex
-                  xs12
+                </v-col>
+                <v-col
+                  xs="12"
                 >
                   <v-text-field
                     v-model.trim="editedItem.text"
                     label="Comment"
                   />
-                </v-flex>
-              </v-layout>
+                </v-col>
+              </v-row>
             </v-container>
           </v-card-text>
 
           <v-card-actions>
             <v-spacer />
             <v-btn
-              color="blue darken-1"
-              flat
+              color="blue-darken-1"
+              variant="flat"
               @click="close"
             >
               {{ $t('Cancel') }}
             </v-btn>
             <v-btn
-              color="blue darken-1"
-              flat
+              color="blue-darken-1"
+              variant="flat"
               @click="save"
             >
               {{ $t('Save') }}
@@ -152,33 +153,37 @@
     </v-dialog>
 
     <v-card>
-      <v-card-title class="title">
+      <v-card-title class="text-h6">
         {{ $t('APIKeys') }}
         <v-spacer />
         <v-btn-toggle
           v-model="status"
-          class="transparent"
+          class="bg-transparent"
           multiple
         >
           <v-btn
             value="active"
-            flat
+            variant="flat"
           >
-            <v-tooltip bottom>
-              <v-icon slot="activator">
-                check_circle
-              </v-icon>
+            <v-tooltip location="bottom">
+              <template #activator="{props}">
+                <v-icon v-bind="props">
+                  check_circle
+                </v-icon>
+              </template>
               <span>{{ $t('Active') }}</span>
             </v-tooltip>
           </v-btn>
           <v-btn
             value="expired"
-            flat
+            variant="flat"
           >
-            <v-tooltip bottom>
-              <v-icon slot="activator">
-                error_outline
-              </v-icon>
+            <v-tooltip location="bottom">
+              <template #activator="{props}">
+                <v-icon v-bind="props">
+                  error_outline
+                </v-icon>
+              </template>
               <span>{{ $t('Expired') }}</span>
             </v-tooltip>
           </v-btn>
@@ -194,10 +199,10 @@
       </v-card-title>
 
       <v-data-table
-        :headers="computedHeaders"
-        :items="keys"
+        :header="computedHeaders"
+        :item="keys"
         :rows-per-page-items="rowsPerPageItems"
-        :pagination.sync="pagination"
+        v-model:pagination="pagination"
         class="px-2"
         :search="search"
         :loading="isLoading"
@@ -205,8 +210,7 @@
         sort-icon="arrow_drop_down"
       >
         <template
-          slot="items"
-          slot-scope="props"
+          #items="props"
         >
           <td
             class="text-no-wrap"
@@ -215,44 +219,51 @@
             {{ props.item.key }}
             <v-tooltip
               :key="copyIconText"
-              top
+              location="top"
             >
-              <v-icon
-                slot="activator"
-                :value="props.item.key"
-                style="font-size: 16px;"
-                @click="clipboardCopy(props.item.key)"
-              >
-                content_copy
-              </v-icon>
+              <template #activator="{props}">
+                <v-icon
+                  v-bind="props"
+                  :value="props.item.key"
+                  style="font-size: 16px;"
+                  @click="clipboardCopy(props.item.key)"
+                >
+                  content_copy
+                </v-icon>
+              </template>
               <span>{{ copyIconText }}</span>
             </v-tooltip>
           </td>
           <td>
             <v-tooltip
               v-if="!isExpired(props.item.expireTime)"
-              top
+              location="top"
             >
-              <v-icon
-                slot="activator"
-                color="primary"
-                small
-              >
-                check_circle
-              </v-icon>
+              <template #activator="{props}">
+                <v-icon
+                  v-bind="props"
+                  color="primary"
+                  size="small"
+                >
+                  check_circle
+                </v-icon>
+              </template>
+
               <span>{{ $t('Active') }}</span>
             </v-tooltip>
             <v-tooltip
               v-if="isExpired(props.item.expireTime)"
-              top
+              location="top"
             >
-              <v-icon
-                slot="activator"
-                color="error"
-                small
-              >
-                error_outline
-              </v-icon>
+              <template #activator="{props}">
+                <v-icon
+                  v-bind="props"
+                  color="error"
+                  size="small"
+                >
+                  error_outline
+                </v-icon>
+              </template>
               <span>{{ $t('Expired') }}</span>
             </v-tooltip>
           </td>
@@ -275,11 +286,11 @@
             />
           </td>
           <td
-            class="text-xs-center"
+            class="text-center"
           >
             {{ props.item.count }}
           </td>
-          <td>{{ props.item.lastUsedTime | timeago }}</td>
+          <td>{{ $filters.timeago(props.item.lastUsedTime) }}</td> 
           <td
             v-if="$config.customer_views"
           >
@@ -293,8 +304,8 @@
               @click="editItem(props.item)"
             >
               <v-icon
-                small
-                color="grey darken-3"
+                size="small"
+                color="grey-darken-3"
               >
                 edit
               </v-icon>
@@ -306,8 +317,8 @@
               @click="deleteItem(props.item)"
             >
               <v-icon
-                small
-                color="grey darken-3"
+                size="small"
+                color="grey-darken-3"
               >
                 delete
               </v-icon>
@@ -320,15 +331,15 @@
               class="btn--plain mx-0"
             >
               <v-icon
-                small
-                color="grey darken-3"
+                size="small"
+                color="grey-darken-3"
               >
                 get_app
               </v-icon>
             </v-btn>
           </td>
         </template>
-        <template slot="no-data">
+        <template #no-data>
           <v-alert
             :value="true"
             color="error"
@@ -337,14 +348,16 @@
             {{ $t('NoDisplay') }}
           </v-alert>
         </template>
-        <v-alert
-          slot="no-results"
-          :value="true"
-          color="error"
-          icon="warning"
-        >
-          {{ $t('SearchNoResult1') }} "{{ search }}" {{ $t('SearchNoResult2') }}
-        </v-alert>
+        <template #no-results>
+          <v-alert
+            :value="true"
+            color="error"
+            icon="warning"
+          >
+            {{ $t('SearchNoResult1') }} "{{ search }}" {{ $t('SearchNoResult2') }}
+          </v-alert>
+        </template>
+
       </v-data-table>
     </v-card>
 
@@ -379,16 +392,16 @@ export default {
     search: '',
     dialog: false,
     headers: [
-      { text: i18n.t('APIKey'), value: 'key', sortable: false },
+      { text: i18n.global.t('APIKey'), value: 'key', sortable: false },
       { text: '', value: 'expireTime' },
-      { text: i18n.t('User'), value: 'user' },
-      { text: i18n.t('Scopes'), value: 'scopes' },
-      { text: i18n.t('Description'), value: 'text' },
-      { text: i18n.t('Expires'), value: 'expireTime' },
-      { text: i18n.t('Count'), value: 'count' },
-      { text: i18n.t('LastUsed'), value: 'lastUsedTime' },
-      { text: i18n.t('Customer'), value: 'customer' },
-      { text: i18n.t('Actions'), value: 'name', sortable: false }
+      { text: i18n.global.t('User'), value: 'user' },
+      { text: i18n.global.t('Scopes'), value: 'scopes' },
+      { text: i18n.global.t('Description'), value: 'text' },
+      { text: i18n.global.t('Expires'), value: 'expireTime' },
+      { text: i18n.global.t('Count'), value: 'count' },
+      { text: i18n.global.t('LastUsed'), value: 'lastUsedTime' },
+      { text: i18n.global.t('Customer'), value: 'customer' },
+      { text: i18n.global.t('Actions'), value: 'name', sortable: false }
     ],
     editedId: null,
     editedItem: {
@@ -408,7 +421,7 @@ export default {
       scopes: [],
       expireTime: null
     },
-    copyIconText: i18n.t('Copy')
+    copyIconText: i18n.global.t('Copy')
   }),
   computed: {
     computedHeaders() {
@@ -436,7 +449,7 @@ export default {
       return this.$store.state.keys.isLoading
     },
     formTitle() {
-      return !this.editedId ? i18n.t('NewApiKey') : i18n.t('EditApiKey')
+      return !this.editedId ? i18n.global.t('NewApiKey') : i18n.global.t('EditApiKey')
     },
     refresh() {
       return this.$store.state.refresh
@@ -487,7 +500,7 @@ export default {
       this.dialog = true
     },
     deleteItem(item) {
-      confirm(i18n.t('ConfirmDelete')) &&
+      confirm(i18n.global.t('ConfirmDelete')) &&
         this.$store.dispatch('keys/deleteKey', item.id)
     },
     close() {
@@ -527,7 +540,7 @@ export default {
       return this.isExpired(key.expireTime) ? 'expired' : 'active'
     },
     clipboardCopy(text) {
-      this.copyIconText = i18n.t('Copied')
+      this.copyIconText = i18n.global.t('Copied')
       let textarea = document.createElement('textarea')
       textarea.textContent = text
       document.body.appendChild(textarea)
@@ -535,7 +548,7 @@ export default {
       document.execCommand('copy')
       document.body.removeChild(textarea)
       setTimeout(() => {
-        this.copyIconText = i18n.t('Copy')
+        this.copyIconText = i18n.global.t('Copy')
       }, 2000)
     },
     toData(item) {

@@ -3,19 +3,19 @@
     grid-list-sm
     fill-height
   >
-    <v-layout
+    <v-row
       align-center
       row
       wrap
     >
-      <v-flex
+      <v-col
         v-if="isBasicAuth"
-        xs12
-        sm8
+        xs="12"
+        sm="8"
         offset-xs0
         offset-sm2
       >
-        <p class="text-xs-center headline font-weight-medium">
+        <p class="text-center text-h5 font-weight-medium">
           {{ $t('LoginToContinue') }}
         </p>
         <v-form @submit.prevent="login()">
@@ -25,7 +25,7 @@
             type="text"
             :label="$t('Username')"
             prepend-inner-icon="alternate_email"
-            outline
+            variant="outlined"
           />
           <v-text-field
             v-model="password"
@@ -33,7 +33,7 @@
             :type="showPassword ? 'text' : 'password'"
             :label="$t('Password')"
             :append-icon="showPassword ? 'visibility_off' : 'visibility'"
-            outline
+            variant="outlined"
             @click:append="showPassword = !showPassword"
           />
           <v-btn
@@ -44,9 +44,9 @@
             {{ $t('LogIn') }}
           </v-btn>
         </v-form>
-        <div class="text-xs-center">
+        <div class="text-center">
           <v-btn
-            flat
+            variant="flat"
             color="primary"
             to="/signup"
             :disabled="!signupEnabled"
@@ -54,37 +54,37 @@
             {{ $t('CreateAccount') }}
           </v-btn>
           <v-btn
-            flat
+            variant="flat"
             color="primary"
             to="/forgot"
           >
             {{ $t('ForgotPassword') }}
           </v-btn>
         </div>
-      </v-flex>
+      </v-col>
 
-      <v-flex
+      <v-col
         v-else-if="$config.provider == 'saml2'"
-        xs12
-        sm8
+        xs="12"
+        sm="8"
         offset-xs0
         offset-sm2
       >
         <div>
-          <p class="text-xs-center headline font-weight-medium">
+          <p class="text-center text-h5 font-weight-medium">
             SAML2 Authentication uses pop-up windows.
           </p>
-          <p class="text-xs-center subheading font-weight-medium">
+          <p class="text-center subheading font-weight-medium">
             Please allow pop-ups from <kbd>{{ host }}</kbd>
           </p>
         </div>
         <div v-show="message && !error">
-          <p class="text-xs-center headline font-weight-medium">
+          <p class="text-center text-h5 font-weight-medium">
             {{ message }}
           </p>
         </div>
         <div v-show="error">
-          <p class="text-xs-center headline font-weight-medium">
+          <p class="text-center text-h5 font-weight-medium">
             {{ $t('UnspecifiedProblem') }}
             <a
               href="#"
@@ -93,26 +93,26 @@
               {{ $t('TryAgain') }}
             </a>
           </p>
-          <p class="text-xs-center subheading font-weight-medium">
+          <p class="text-center subheading font-weight-medium">
             {{ $t('Error') }}: {{ error }}
           </p>
         </div>
-      </v-flex>
+      </v-col>
 
-      <v-flex
+      <v-col
         v-else
-        xs12
-        sm8
+        xs="12"
+        sm="8"
         offset-xs0
         offset-sm2
       >
         <div v-show="message && !error">
-          <p class="text-xs-center headline font-weight-medium">
+          <p class="text-center text-h5 font-weight-medium">
             {{ message }}
           </p>
         </div>
         <div v-show="error">
-          <p class="text-xs-center headline font-weight-medium">
+          <p class="text-center text-h5 font-weight-medium">
             {{ $t('UnspecifiedProblem') }}
             <a
               href="#"
@@ -121,19 +121,19 @@
               {{ $t('TryAgain') }}
             </a>
           </p>
-          <p class="text-xs-center subheading font-weight-medium">
+          <p class="text-center subheading font-weight-medium">
             {{ $t('Error') }}: {{ error }}
           </p>
         </div>
-      </v-flex>
+      </v-col>
 
-      <v-flex
-        xs12
-        sm8
+      <v-col
+        xs="12"
+        sm="8"
         offset-xs0
         offset-sm2
       />
-    </v-layout>
+    </v-row>
   </v-container>
 </template>
 
@@ -188,7 +188,7 @@ export default {
           .then(() => this.$router.push({ path: this.$route.query.redirect || '/' }))
           .catch(error => this.error = error.response.data.message)
       } else {
-        this.message = i18n.t('AuthNotPossible')
+        this.message = i18n.global.t('AuthNotPossible')
         this.error = `Unknown authentication provider (${this.$config.provider})`
       }
     },
@@ -202,13 +202,13 @@ export default {
               .then(() => this.$router.push({ path: this.$route.query.redirect || '/' }))
               .catch(error => this.error = error.response.data.message)
           } else {
-            this.message = i18n.t('AuthNotPossible')
+            this.message = i18n.global.t('AuthNotPossible')
             this.error = event.data.message ? event.data.message : JSON.stringify(event)
           }
         }
         return
       })
-      auth_win = window.open(this.$config.endpoint + '/auth/saml', i18n.t('AuthInProgress'))
+      auth_win = window.open(this.$config.endpoint + '/auth/saml', i18n.global.t('AuthInProgress'))
     }
   }
 }

@@ -1,43 +1,49 @@
 <template>
   <v-card>
-    <v-card-title class="title">
+    <v-card-title class="text-h6">
       {{ $t('Heartbeats') }}
       <v-spacer />
       <v-btn-toggle
         v-model="status"
-        class="transparent"
+        class="bg-transparent"
         multiple
       >
         <v-btn
           value="ok"
-          flat
+          variant="flat"
         >
-          <v-tooltip bottom>
-            <v-icon slot="activator">
-              check_circle
-            </v-icon>
+          <v-tooltip location="bottom">
+            <template #activator="{props}">
+              <v-icon v-bind="props">
+                check_circle
+              </v-icon>
+            </template>
             <span>{{ $t('OK') }}</span>
           </v-tooltip>
         </v-btn>
         <v-btn
           value="slow"
-          flat
+          variant="flat"
         >
-          <v-tooltip bottom>
-            <v-icon slot="activator">
-              access_time
-            </v-icon>
+          <v-tooltip location="bottom">
+            <template #activator="{props}">
+              <v-icon v-bind="props">
+                access_time
+              </v-icon>
+            </template>
             <span>{{ $t('Slow') }}</span>
           </v-tooltip>
         </v-btn>
         <v-btn
           value="expired"
-          flat
+          variant="flat"
         >
-          <v-tooltip bottom>
-            <v-icon slot="activator">
-              timer_off
-            </v-icon>
+          <v-tooltip location="bottom">
+            <template #activator="{props}">
+              <v-icon v-bind="props">
+                timer_off
+              </v-icon>
+            </template>
             <span>{{ $t('Expired') }}</span>
           </v-tooltip>
         </v-btn>
@@ -53,20 +59,17 @@
     </v-card-title>
 
     <v-data-table
-      :headers="computedHeaders"
-      :items="heartbeats"
+      :header="computedHeaders"
+      :item="heartbeats"
       :rows-per-page-items="rowsPerPageItems"
-      :pagination.sync="pagination"
+      v-model:pagination="pagination"
       class="px-2"
       :search="search"
       :loading="isLoading"
       must-sort
       sort-icon="arrow_drop_down"
     >
-      <template
-        slot="items"
-        slot-scope="props"
-      >
+      <template #items="props">
         <td>{{ props.item.origin }}</td>
         <td
           v-if="$config.customer_views"
@@ -80,7 +83,7 @@
             label
             small
           >
-            <v-icon left>
+            <v-icon start>
               label
             </v-icon>{{ tag }}
           </v-chip>
@@ -104,16 +107,16 @@
           {{ diffTime(props.item.createTime, props.item.receiveTime) }} ms
         </td>
         <td
-          class="text-xs-center text-no-wrap"
+          class="text-center text-no-wrap"
         >
-          {{ timeoutLeft(props.item) | hhmmss }}
+          {{ $filters.hhmmss(timeoutLeft(props.item)) }}
         </td>
         <td>
-          {{ props.item.receiveTime | timeago }}
+          {{ $filters.timeago(props.item.receiveTime) }}
         </td>
         <td>
           <span :class="['label', 'label-' + props.item.status.toLowerCase()]">
-            {{ props.item.status | capitalize }}
+            {{ $filters.capitalize(props.item.status) }}
           </span>
         </td>
         <td class="text-no-wrap">
@@ -124,15 +127,15 @@
             @click="deleteItem(props.item)"
           >
             <v-icon
-              small
-              color="grey darken-3"
+              size="small"
+              color="grey-darken-3"
             >
               delete
             </v-icon>
           </v-btn>
         </td>
       </template>
-      <template slot="no-data">
+      <template #no-data>
         <v-alert
           :value="true"
           color="error"
@@ -141,14 +144,15 @@
           {{ $t('NoDisplay') }}
         </v-alert>
       </template>
-      <v-alert
-        slot="no-results"
-        :value="true"
-        color="error"
-        icon="warning"
-      >
-        {{ $t('SearchNoResult1') }} "{{ search }}" {{ $t('SearchNoResult2') }}
-      </v-alert>
+      <template #no-results>
+        <v-alert
+          :value="true"
+          color="error"
+          icon="warning"
+        >
+          {{ $t('SearchNoResult1') }} "{{ search }}" {{ $t('SearchNoResult2') }}
+        </v-alert>
+      </template>
     </v-data-table>
   </v-card>
 </template>
@@ -175,17 +179,17 @@ export default {
     status: ['ok', 'slow', 'expired'],
     search: '',
     headers: [
-      { text: i18n.t('Origin'), value: 'origin' },
-      { text: i18n.t('Customer'), value: 'customer' },
-      { text: i18n.t('Tags'), value: 'tags' },
-      { text: i18n.t('Attributes'), value: 'attributes' },
-      { text: i18n.t('CreateTime'), value: 'createTime' },
-      { text: i18n.t('ReceiveTime'), value: 'receiveTime' },
-      { text: i18n.t('Latency'), value: 'latency' },
-      { text: i18n.t('Timeout'), value: 'timeout' },
-      { text: i18n.t('Since'), value: 'since' },
-      { text: i18n.t('Status'), value: 'status' },
-      { text: i18n.t('Actions'), value: 'name', sortable: false }
+      { text: i18n.global.t('Origin'), value: 'origin' },
+      { text: i18n.global.t('Customer'), value: 'customer' },
+      { text: i18n.global.t('Tags'), value: 'tags' },
+      { text: i18n.global.t('Attributes'), value: 'attributes' },
+      { text: i18n.global.t('CreateTime'), value: 'createTime' },
+      { text: i18n.global.t('ReceiveTime'), value: 'receiveTime' },
+      { text: i18n.global.t('Latency'), value: 'latency' },
+      { text: i18n.global.t('Timeout'), value: 'timeout' },
+      { text: i18n.global.t('Since'), value: 'since' },
+      { text: i18n.global.t('Status'), value: 'status' },
+      { text: i18n.global.t('Actions'), value: 'name', sortable: false }
     ]
   }),
   computed: {
@@ -219,7 +223,7 @@ export default {
       this.$store.dispatch('heartbeats/getHeartbeats')
     },
     deleteItem(item) {
-      confirm(i18n.t('ConfirmDelete')) &&
+      confirm(i18n.global.t('ConfirmDelete')) &&
         this.$store.dispatch('heartbeats/deleteHeartbeat', item.id)
     },
     diffTime(a, b) {

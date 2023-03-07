@@ -3,18 +3,18 @@
     grid-list-sm
     fill-height
   >
-    <v-layout
+    <v-row
       align-center
       row
       wrap
     >
-      <v-flex
-        xs12
-        sm8
+      <v-col
+        xs="12"
+        sm="8"
         offset-xs0
         offset-sm2
       >
-        <p class="text-xs-center headline font-weight-medium">
+        <p class="text-center text-h5 font-weight-medium">
           <span v-show="signupEnabled">
             {{ $t('CreateAlertaAccount') }}
           </span>
@@ -31,7 +31,7 @@
             type="text"
             :label="$t('FullName')"
             :disabled="!signupEnabled"
-            outline
+            variant="outlined"
             :rules="[rules.required]"
             required
           />
@@ -42,7 +42,7 @@
             :label="$t('Username')"
             prepend-inner-icon="alternate_email"
             :disabled="!signupEnabled"
-            outline
+            variant="outlined"
             :rules="[rules.required]"
             required
           />
@@ -53,7 +53,7 @@
             :label="$t('Password')"
             :append-icon="showPassword ? 'visibility_off' : 'visibility'"
             :disabled="!signupEnabled"
-            outline
+            variant="outlined"
             :rules="[rules.min]"
             required
             @click:append="showPassword = !showPassword"
@@ -65,7 +65,7 @@
             :type="showPassword ? 'text' : 'password'"
             :label="$t('ConfirmPassword')"
             :disabled="!signupEnabled"
-            outline
+            variant="outlined"
             :rules="[rules.passwordMatch]"
             required
             @click:append="showPassword = !showPassword"
@@ -76,7 +76,7 @@
             type="text"
             :label="$t('Description')"
             :disabled="!signupEnabled"
-            outline
+            variant="outlined"
           />
           <v-btn
             :loading="isSending"
@@ -88,26 +88,26 @@
             {{ $t('SignUp') }}
           </v-btn>
         </v-form>
-        <div class="text-xs-center">
-          <span class="body-2">
+        <div class="text-center">
+          <span class="text-body-2">
             {{ $t('AlreadyHaveAccount') }}
           </span>
           <v-btn
-            flat
+            variant="flat"
             color="primary"
             to="/login"
           >
             {{ $t('SignIn') }}
           </v-btn>
         </div>
-      </v-flex>
-      <v-flex
-        xs12
-        sm8
+      </v-col>
+      <v-col
+        xs="12"
+        sm="8"
         offset-xs0
         offset-sm2
       />
-    </v-layout>
+    </v-row>
   </v-container>
 </template>
 
@@ -124,10 +124,10 @@ export default {
     showPassword: false,
     text: null,
     rules: {
-      required: v => !!v || i18n.t('Required'),
-      min: v => (v && v.length >= 6) || i18n.t('Min6Char'),
+      required: v => !!v || i18n.global.t('Required'),
+      min: v => (v && v.length >= 6) || i18n.global.t('Min6Char'),
       passwordMatch: v =>
-        (v && v == vm.password) || i18n.t('PasswordNotMatch')
+        (v && v == vm.password) || i18n.global.t('PasswordNotMatch')
     }
   }),
   computed: {

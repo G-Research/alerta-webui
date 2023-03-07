@@ -1,17 +1,16 @@
 <template>
   <div>
     <v-data-table
-      :headers="headers"
-      :items="metrics"
+      :header="headers"
+      :item="metrics"
       class="px-2"
       hide-actions
     >
       <template
-        slot="items"
-        slot-scope="props"
+        #items="props"
       >
         <td>{{ props.item.title }}</td>
-        <td>{{ props.item.type | capitalize }}</td>
+        <td>{{ $filters.capitalize(props.item.type) }}</td>
         <td>{{ props.item.group }}.{{ props.item.name }}</td>
         <td>{{ props.item.value || props.item.count }}</td>
         <td>{{ avgTime(props.item) }}</td>
@@ -19,14 +18,13 @@
     </v-data-table>
 
     <v-data-table
-      :headers="[{sortable: false},{sortable: false},{sortable: false},{sortable: false}]"
-      :items="uptime"
+      :header="[{sortable: false},{sortable: false},{sortable: false},{sortable: false}]"
+      :item="uptime"
       class="px-2"
       hide-actions
     >
       <template
-        slot="items"
-        slot-scope="props"
+        #items="props"
       >
         <td>{{ $t('LastUpdate') }}</td>
         <td>
@@ -37,7 +35,7 @@
           />
         </td>
         <td>{{ $t('Uptime') }}</td>
-        <td>{{ props.item.uptime / 1000 | days }}</td>
+        <td>{{ $filters.days(props.item.uptime / 1000) }}</td>
       </template>
     </v-data-table>
   </div>
@@ -54,11 +52,11 @@ export default {
   },
   data: () => ({
     headers: [
-      {text: i18n.t('Metric'), value: 'title', sortable: false},
-      {text: i18n.t('Type'), value: 'type', sortable: false},
-      {text: i18n.t('Name'), value: 'name', sortable: false},
-      {text: i18n.t('Value'), value: 'value', sortable: false},
-      {text: i18n.t('AvgTime'), value: 'time', sortable: false},
+      {text: i18n.global.t('Metric'), value: 'title', sortable: false},
+      {text: i18n.global.t('Type'), value: 'type', sortable: false},
+      {text: i18n.global.t('Name'), value: 'name', sortable: false},
+      {text: i18n.global.t('Value'), value: 'value', sortable: false},
+      {text: i18n.global.t('AvgTime'), value: 'time', sortable: false},
     ]
   }),
   computed: {

@@ -70,6 +70,7 @@ export const de = {
   Unshelve: 'Unshelve',
   Close: 'Schließen',
   Watch: 'Beobachten',
+  Notes: 'Notities',
   Unwatch: 'Nicht beobachten',
   AddNote: 'Notiz hinzufügen',
   Delete: 'Löschen',
@@ -91,6 +92,7 @@ export const de = {
   Environment: 'Umgebung',
   Resource: 'Ressource',
   Event: 'Ereignis',
+  Info: 'die Info',
   Correlate: 'Korrelation',
   Group: 'Gruppe',
   Severity: 'Schweregrad',
@@ -371,6 +373,9 @@ export const de = {
   SearchNoResult1: 'Ihre Suche nach ',
   SearchNoResult2: 'hat nichts gefunden.',
   OK: 'OK',
+
+  // Services
+  Jira: 'Jira',
 
   // ENDS.
 }
