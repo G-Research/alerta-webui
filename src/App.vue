@@ -799,7 +799,10 @@ export default {
         this.$store.dispatch('alerts/getAlerts')
       })
     },
-    bulkAckAlert() {
+    async bulkAckAlert() {
+      if (this.showAddNoteForm && this.text !== '') {
+        await this.bulkAddNotes()
+      }
       this.selected.map(a => {
         this.$store
           .dispatch('alerts/takeAction', [
@@ -818,7 +821,10 @@ export default {
         this.text=''
       })
     },
-    bulkShelveAlert() {
+    async bulkShelveAlert() {
+      if (this.showAddNoteForm && this.text !== '') {
+        await this.bulkAddNotes()
+      }
       Promise.all(this.selected.map(a => {
         this.$store
           .dispatch('alerts/takeAction', [
